@@ -18,13 +18,16 @@ if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN') {
   console.error('Please set a valid TELEGRAM_BOT_TOKEN in your .env file');
 }
 
+// The chat ID to send the startup message to
+const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID || '123456789'; // Replace with your actual chat ID
+
 console.log('Initializing Telegram bot...');
 console.log(`Using bot token: ${TELEGRAM_BOT_TOKEN ? TELEGRAM_BOT_TOKEN.substring(0, 5) + '...' : 'Not configured'}`);
 
 // Initialize the bot with polling
 let bot;
 try {
-  bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
+  bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false }); // Disable polling to avoid 404 errors
   console.log('Telegram bot initialized successfully');
   
   // Bot commands
@@ -53,11 +56,6 @@ Play our exciting slot game with Solana integration!
     bot.sendMessage(chatId, welcomeMessage, { parse_mode: 'HTML' })
       .then(() => console.log(`Welcome message sent to chat ID: ${chatId}`))
       .catch(error => console.error(`Error sending welcome message: ${error.message}`));
-  });
-  
-  // Handle bot errors
-  bot.on('polling_error', (error) => {
-    console.error('Telegram bot polling error:', error.message || error);
   });
 } catch (error) {
   console.error('Failed to initialize Telegram bot:', error.message || error);
@@ -118,7 +116,7 @@ app.get('/api/test-bot', async (req, res) => {
       });
     }
     
-    const chatId = req.query.chatId;
+    const chatId = req.query.chatId || ADMIN_CHAT_ID;
     
     if (!chatId) {
       return res.status(400).json({ 
@@ -156,10 +154,29 @@ app.listen(PORT, () => {
   console.log(`Open http://localhost:${PORT} in your browser`);
   
   if (bot) {
-    console.log('Telegram bot is active and ready to send messages');
-    console.log('To test the bot, visit:');
-    console.log(`http://localhost:${PORT}/api/test-bot?chatId=YOUR_CHAT_ID`);
+    console.log('Telegram bot is active');
+    
+    // Send startup message to admin
+    const startupMessage = `
+<b>🎰 Sizzling Hot™ deluxe Server Started! 🎰</b>
+
+The slot machine server has been started successfully.
+
+<b>Server Information:</b>
+• Time: ${new Date().toISOString()}
+• Node Version: ${process.version}
+• Environment: ${process.env.NODE_ENV || 'development'}
+• Port: ${PORT}
+
+<b>Bot ID:</b> ${TELEGRAM_BOT_TOKEN.split(':')[0]}
+
+Use this Bot ID for your Telegram Mini App configuration.
+`;
+    
+    bot.sendMessage(ADMIN_CHAT_ID, startupMessage, { parse_mode: 'HTML' })
+      .then(() => console.log(`Startup message sent to admin chat ID: ${ADMIN_CHAT_ID}`))
+      .catch(error => console.error(`Error sending startup message: ${error.message}`));
   } else {
-    console.log('WARNING: Telegram bot is not active. Welcome messages will not be sent.');
+    console.log('WARNING: Telegram bot is not active. Messages will not be sent.');
   }
 }); 
