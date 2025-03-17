@@ -1,0 +1,29 @@
+{
+  "name": "slotbot",
+  "version": "1.0.0",
+  "description": "Sizzling Hot slot game for Telegram mini app with Three.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "telegram",
+    "mini-app",
+    "slot",
+    "game",
+    "sizzling",
+    "hot",
+    "three.js",
+    "html5"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": "16.x"
+  }
+}

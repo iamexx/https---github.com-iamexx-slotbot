@@ -1,0 +1,164 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
+}
+
+body {
+  background-color: #1a1a2e;
+  color: white;
+  overflow: hidden;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#game-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#game-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#ui-container {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+}
+
+#balance-display {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px 20px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+#bet-controls {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 5px 15px;
+  border-radius: 20px;
+}
+
+#bet-decrease, #bet-increase {
+  background-color: #e94560;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#current-bet {
+  margin: 0 15px;
+  font-size: 16px;
+}
+
+#spin-button {
+  background-color: #e94560;
+  color: white;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 25px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#spin-button:hover {
+  background-color: #ff6b81;
+  transform: scale(1.05);
+}
+
+#spin-button:active {
+  transform: scale(0.95);
+}
+
+#spin-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#win-message {
+  margin-top: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  height: 30px;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #ui-container {
+    bottom: 10px;
+  }
+  
+  #balance-display {
+    font-size: 16px;
+    padding: 8px 16px;
+  }
+  
+  #spin-button {
+    padding: 10px 30px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  #ui-container {
+    bottom: 5px;
+  }
+  
+  #balance-display {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+  
+  #bet-controls {
+    padding: 3px 10px;
+  }
+  
+  #current-bet {
+    margin: 0 10px;
+    font-size: 14px;
+  }
+  
+  #spin-button {
+    padding: 8px 25px;
+    font-size: 16px;
+  }
+} 
