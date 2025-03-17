@@ -10,6 +10,7 @@ class WalletManager {
     this.walletAddress = null;
     this.balance = 0;
     this.client = null;
+    this.solanaWallet = null;
     this.lastError = null;
     this.debugInfo = {};
     
@@ -33,12 +34,6 @@ class WalletManager {
       tmaScript.src = '/@tmawallet/sdk/dist/index.js';
       tmaScript.type = 'text/javascript';
       document.head.appendChild(tmaScript);
-      
-      // Load ethers
-      const ethersScript = document.createElement('script');
-      ethersScript.src = '/ethers/dist/ethers.min.js';
-      ethersScript.type = 'text/javascript';
-      document.head.appendChild(ethersScript);
       
       // Load Solana Web3.js
       const solanaScript = document.createElement('script');
@@ -75,16 +70,20 @@ class WalletManager {
           throw new Error('TMA Wallet SDK not loaded');
         }
         
-        // Create client and authenticate
+        // Create client
         this.client = new window.TMAWalletSDK.TMAWalletClient(this.apiKey);
         this.debugInfo.clientCreated = !!this.client;
         
+        // Create Solana wallet
+        this.solanaWallet = new window.TMAWalletSDK.TMAWalletSolana(this.client);
+        this.debugInfo.solanaWalletCreated = !!this.solanaWallet;
+        
         // Authenticate user (creates a new wallet if needed)
-        await this.client.authenticate();
+        await this.solanaWallet.authenticate();
         this.debugInfo.authenticated = true;
         
         // Get wallet address
-        this.walletAddress = this.client.walletAddress;
+        this.walletAddress = this.solanaWallet.walletAddress;
         this.debugInfo.walletAddress = this.walletAddress;
         
         console.log('Your wallet address: ', this.walletAddress);
@@ -94,6 +93,9 @@ class WalletManager {
         
         this.isInitialized = true;
         console.log('Wallet initialized with address:', this.walletAddress);
+        
+        // Show wallet modal automatically for new users
+        this.showWalletModal();
         
         return true;
       } catch (error) {
@@ -122,7 +124,7 @@ class WalletManager {
   waitForScripts() {
     return new Promise((resolve) => {
       const checkScripts = () => {
-        if (window.TMAWalletSDK && window.ethers && window.solanaWeb3) {
+        if (window.TMAWalletSDK && window.solanaWeb3) {
           resolve();
         } else {
           setTimeout(checkScripts, 100);
@@ -187,6 +189,44 @@ class WalletManager {
   }
   
   /**
+   * Generate a new wallet
+   */
+  async generateNewWallet() {
+    try {
+      if (!this.client) {
+        await this.initialize();
+      }
+      
+      // Create a new wallet
+      this.solanaWallet = new window.TMAWalletSDK.TMAWalletSolana(this.client);
+      
+      // Force creation of a new wallet
+      await this.solanaWallet.authenticate({ forceNewWallet: true });
+      
+      // Get new wallet address
+      this.walletAddress = this.solanaWallet.walletAddress;
+      
+      // Update balance
+      await this.updateBalance();
+      
+      console.log('New wallet generated with address:', this.walletAddress);
+      
+      // Show wallet modal with the new wallet
+      this.showWalletModal();
+      
+      return true;
+    } catch (error) {
+      this.lastError = {
+        method: 'generateNewWallet',
+        message: error.message,
+        stack: error.stack
+      };
+      console.error('Failed to generate new wallet:', error);
+      return false;
+    }
+  }
+  
+  /**
    * Get wallet address
    */
   getWalletAddress() {
@@ -213,6 +253,111 @@ class WalletManager {
       lastError: this.lastError,
       debugInfo: this.debugInfo
     };
+  }
+  
+  /**
+   * Show wallet modal with options to deposit, withdraw, or generate a new wallet
+   */
+  showWalletModal() {
+    // Create modal for wallet management
+    const modal = document.createElement('div');
+    modal.className = 'wallet-modal';
+    modal.innerHTML = `
+      <div class="wallet-modal-content">
+        <span class="wallet-modal-close">&times;</span>
+        <h2>Your Solana Wallet</h2>
+        <div class="wallet-info">
+          <p>Status: <span class="${this.isInitialized ? 'success' : 'error'}">${this.isInitialized ? 'Active' : 'Not Initialized'}</span></p>
+          <p>Wallet Address: <span class="wallet-address" title="Click to copy">${this.walletAddress || 'Not available'}</span></p>
+          <p>Balance: <span class="wallet-balance">${this.balance ? this.balance.toFixed(4) : '0'}</span> SOL</p>
+          <p>Network: <span>${this.network}</span></p>
+        </div>
+        <div class="wallet-actions">
+          <button id="deposit-button" class="wallet-action-button">Deposit SOL</button>
+          <button id="withdraw-button" class="wallet-action-button">Withdraw SOL</button>
+          <button id="new-wallet-button" class="wallet-action-button">Generate New Wallet</button>
+        </div>
+        <div class="wallet-message"></div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listeners
+    const closeBtn = modal.querySelector('.wallet-modal-close');
+    const depositBtn = modal.querySelector('#deposit-button');
+    const withdrawBtn = modal.querySelector('#withdraw-button');
+    const newWalletBtn = modal.querySelector('#new-wallet-button');
+    const walletAddressEl = modal.querySelector('.wallet-address');
+    const messageDiv = modal.querySelector('.wallet-message');
+    
+    closeBtn.addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    
+    // Add copy to clipboard functionality
+    if (this.walletAddress) {
+      walletAddressEl.addEventListener('click', () => {
+        navigator.clipboard.writeText(this.walletAddress).then(() => {
+          walletAddressEl.classList.add('copied');
+          const originalText = walletAddressEl.textContent;
+          walletAddressEl.textContent = 'Copied!';
+          
+          setTimeout(() => {
+            walletAddressEl.textContent = originalText;
+            walletAddressEl.classList.remove('copied');
+          }, 1500);
+        }).catch(err => {
+          console.error('Failed to copy address: ', err);
+        });
+      });
+    }
+    
+    depositBtn.addEventListener('click', () => {
+      document.body.removeChild(modal);
+      this.openDepositDialog();
+    });
+    
+    withdrawBtn.addEventListener('click', () => {
+      document.body.removeChild(modal);
+      this.openWithdrawDialog();
+    });
+    
+    newWalletBtn.addEventListener('click', async () => {
+      messageDiv.textContent = 'Generating new wallet...';
+      messageDiv.className = 'wallet-message info';
+      
+      const success = await this.generateNewWallet();
+      
+      if (success) {
+        messageDiv.textContent = 'New wallet generated successfully!';
+        messageDiv.className = 'wallet-message success';
+        
+        // Update wallet info in the modal
+        modal.querySelector('.wallet-address').textContent = this.walletAddress || 'Not available';
+        modal.querySelector('.wallet-balance').textContent = this.balance ? this.balance.toFixed(4) : '0';
+        
+        // Update copy to clipboard functionality for new address
+        const updatedWalletAddressEl = modal.querySelector('.wallet-address');
+        updatedWalletAddressEl.addEventListener('click', () => {
+          navigator.clipboard.writeText(this.walletAddress).then(() => {
+            updatedWalletAddressEl.classList.add('copied');
+            const originalText = updatedWalletAddressEl.textContent;
+            updatedWalletAddressEl.textContent = 'Copied!';
+            
+            setTimeout(() => {
+              updatedWalletAddressEl.textContent = originalText;
+              updatedWalletAddressEl.classList.remove('copied');
+            }, 1500);
+          }).catch(err => {
+            console.error('Failed to copy address: ', err);
+          });
+        });
+      } else {
+        messageDiv.textContent = 'Failed to generate new wallet. See console for details.';
+        messageDiv.className = 'wallet-message error';
+      }
+    });
   }
   
   /**
@@ -322,6 +467,7 @@ class WalletManager {
         <div class="wallet-actions">
           <button id="retry-init-button">Retry Initialization</button>
           <button id="update-balance-button">Update Balance</button>
+          <button id="show-wallet-button">Show Wallet Modal</button>
         </div>
         <div class="wallet-message"></div>
       </div>
@@ -333,6 +479,7 @@ class WalletManager {
     const closeBtn = modal.querySelector('.wallet-modal-close');
     const retryInitBtn = modal.querySelector('#retry-init-button');
     const updateBalanceBtn = modal.querySelector('#update-balance-button');
+    const showWalletBtn = modal.querySelector('#show-wallet-button');
     const messageDiv = modal.querySelector('.wallet-message');
     
     closeBtn.addEventListener('click', () => {
@@ -388,6 +535,11 @@ class WalletManager {
         const debugInfo = this.getDebugInfo();
         modal.querySelector('pre').textContent = JSON.stringify(debugInfo, null, 2);
       }
+    });
+    
+    showWalletBtn.addEventListener('click', () => {
+      document.body.removeChild(modal);
+      this.showWalletModal();
     });
   }
   
