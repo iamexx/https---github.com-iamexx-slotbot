@@ -321,6 +321,7 @@ class WalletManager {
         <div class="wallet-actions">
           <button id="retry-init-button">Retry Initialization</button>
           <button id="update-balance-button">Update Balance</button>
+          <button id="send-welcome-button">Send Welcome Message</button>
         </div>
         <div class="wallet-message"></div>
       </div>
@@ -332,6 +333,7 @@ class WalletManager {
     const closeBtn = modal.querySelector('.wallet-modal-close');
     const retryInitBtn = modal.querySelector('#retry-init-button');
     const updateBalanceBtn = modal.querySelector('#update-balance-button');
+    const sendWelcomeBtn = modal.querySelector('#send-welcome-button');
     const messageDiv = modal.querySelector('.wallet-message');
     
     closeBtn.addEventListener('click', () => {
@@ -386,6 +388,21 @@ class WalletManager {
         // Update debug info
         const debugInfo = this.getDebugInfo();
         modal.querySelector('pre').textContent = JSON.stringify(debugInfo, null, 2);
+      }
+    });
+    
+    sendWelcomeBtn.addEventListener('click', async () => {
+      messageDiv.textContent = 'Sending welcome message...';
+      messageDiv.className = 'wallet-message info';
+      
+      const success = await this.sendWelcomeMessage();
+      
+      if (success) {
+        messageDiv.textContent = 'Welcome message sent successfully!';
+        messageDiv.className = 'wallet-message success';
+      } else {
+        messageDiv.textContent = 'Failed to send welcome message. See console for details.';
+        messageDiv.className = 'wallet-message error';
       }
     });
   }
@@ -548,6 +565,65 @@ class WalletManager {
       }
     });
   }
+  
+  /**
+   * Send a welcome message to the user via Telegram
+   */
+  async sendWelcomeMessage() {
+    try {
+      if (!window.Telegram?.WebApp) {
+        console.error('Telegram WebApp is not available');
+        return false;
+      }
+      
+      const chatId = window.Telegram.WebApp.initDataUnsafe?.user?.id;
+      if (!chatId) {
+        console.error('Could not get user chat ID');
+        return false;
+      }
+      
+      const welcomeMessage = `
+<b>🎰 Welcome to Sizzling Hot™ deluxe Slot Machine! 🎰</b>
+
+Your wallet status: <b>${this.isInitialized ? 'Connected' : 'Not Connected'}</b>
+${this.walletAddress ? `Wallet Address: <code>${this.walletAddress}</code>` : ''}
+${this.balance > 0 ? `Balance: <b>${this.balance.toFixed(4)} SOL</b>` : ''}
+
+<b>Network:</b> ${this.network.toUpperCase()}
+
+<b>Get started:</b>
+1. Click the WALLET DEBUG button
+2. Connect your wallet
+3. Make a deposit
+4. Spin and win!
+`;
+      
+      // Send the message using our API endpoint
+      const response = await fetch('/api/send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chatId: chatId,
+          message: welcomeMessage
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('Welcome message sent successfully');
+        return true;
+      } else {
+        console.error('Failed to send welcome message:', result.error);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error sending welcome message:', error);
+      return false;
+    }
+  }
 }
 
 // Create global wallet manager instance
@@ -557,5 +633,10 @@ const walletManager = new WalletManager();
 document.addEventListener('DOMContentLoaded', async () => {
   if (window.Telegram?.WebApp) {
     await walletManager.initialize();
+    
+    // Send welcome message after initialization
+    setTimeout(() => {
+      walletManager.sendWelcomeMessage();
+    }, 2000);
   }
 }); 
