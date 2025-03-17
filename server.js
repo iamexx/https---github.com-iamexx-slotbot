@@ -5,6 +5,11 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Log startup information
+console.log('Starting Sizzling Hot Slots server...');
+console.log(`Node version: ${process.version}`);
+console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
