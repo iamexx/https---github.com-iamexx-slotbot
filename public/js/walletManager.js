@@ -4,13 +4,12 @@
  */
 class WalletManager {
   constructor() {
-    // Replace with your actual API key from TMA Wallet Dashboard
-    this.apiKey = 'YOUR_TMA_WALLET_API_KEY';
+    // API key from TMA Wallet Dashboard
+    this.apiKey = '4973ae7778a7bbf0';
     this.isInitialized = false;
     this.walletAddress = null;
     this.balance = 0;
     this.client = null;
-    this.solanaWallet = null;
     this.lastError = null;
     this.debugInfo = {};
     
@@ -18,34 +17,38 @@ class WalletManager {
     this.network = 'testnet'; // 'devnet', 'testnet', or 'mainnet'
     this.rpcUrl = 'https://api.testnet.solana.com';
     
-    // Load required libraries
-    this.loadLibraries();
+    // Load SDK scripts
+    this.loadScripts();
     
     console.log('Wallet Manager initialized');
   }
   
   /**
-   * Load required libraries
+   * Load required SDK scripts
    */
-  async loadLibraries() {
+  loadScripts() {
     try {
-      // For older versions, we need to load the libraries differently
-      this.TMAWalletSDK = await import('/@tmawallet/sdk');
-      this.SolanaWeb3 = await import('/@solana/web3.js');
+      // Load TMA Wallet SDK
+      const tmaScript = document.createElement('script');
+      tmaScript.src = '/@tmawallet/sdk/dist/index.js';
+      tmaScript.type = 'text/javascript';
+      document.head.appendChild(tmaScript);
       
-      this.debugInfo.librariesLoaded = {
-        TMAWalletSDK: !!this.TMAWalletSDK,
-        SolanaWeb3: !!this.SolanaWeb3
-      };
+      // Load ethers
+      const ethersScript = document.createElement('script');
+      ethersScript.src = '/ethers/dist/ethers.min.js';
+      ethersScript.type = 'text/javascript';
+      document.head.appendChild(ethersScript);
       
-      console.log('Libraries loaded successfully', this.debugInfo.librariesLoaded);
+      // Load Solana Web3.js
+      const solanaScript = document.createElement('script');
+      solanaScript.src = '/@solana/web3.js/lib/index.iife.js';
+      solanaScript.type = 'text/javascript';
+      document.head.appendChild(solanaScript);
+      
+      console.log('SDK scripts loaded');
     } catch (error) {
-      this.lastError = {
-        method: 'loadLibraries',
-        message: error.message,
-        stack: error.stack
-      };
-      console.error('Failed to load libraries:', error);
+      console.error('Failed to load SDK scripts:', error);
     }
   }
   
@@ -63,71 +66,45 @@ class WalletManager {
         return false;
       }
       
-      if (!this.TMAWalletSDK) {
-        await this.loadLibraries();
-        if (!this.TMAWalletSDK) {
-          this.lastError = {
-            method: 'initialize',
-            message: 'Failed to load TMA Wallet SDK'
-          };
-          return false;
+      // Wait for scripts to load
+      await this.waitForScripts();
+      
+      try {
+        // Check if TMA Wallet SDK is available
+        if (!window.TMAWalletSDK) {
+          throw new Error('TMA Wallet SDK not loaded');
         }
-      }
-      
-      // Create client and wallet (using older SDK version)
-      this.client = new this.TMAWalletSDK.TMAWalletClient(this.apiKey);
-      
-      this.debugInfo.clientCreated = !!this.client;
-      
-      // For older SDK version, we need to create the wallet differently
-      try {
-        this.solanaWallet = this.client.getSolanaWallet();
-        this.debugInfo.solanaWalletCreated = !!this.solanaWallet;
-      } catch (error) {
-        this.lastError = {
-          method: 'initialize:getSolanaWallet',
-          message: error.message,
-          stack: error.stack
-        };
-        console.error('Failed to get Solana wallet:', error);
-        return false;
-      }
-      
-      // Authenticate user (creates a new wallet if needed)
-      try {
-        await this.solanaWallet.authenticate();
+        
+        // Create client and authenticate
+        this.client = new window.TMAWalletSDK.TMAWalletClient(this.apiKey);
+        this.debugInfo.clientCreated = !!this.client;
+        
+        // Authenticate user (creates a new wallet if needed)
+        await this.client.authenticate();
         this.debugInfo.authenticated = true;
-      } catch (error) {
-        this.lastError = {
-          method: 'initialize:authenticate',
-          message: error.message,
-          stack: error.stack
-        };
-        console.error('Failed to authenticate wallet:', error);
-        return false;
-      }
-      
-      // Get wallet address
-      try {
-        this.walletAddress = this.solanaWallet.getAddress();
+        
+        // Get wallet address
+        this.walletAddress = this.client.walletAddress;
         this.debugInfo.walletAddress = this.walletAddress;
+        
+        console.log('Your wallet address: ', this.walletAddress);
+        
+        // Update balance
+        await this.updateBalance();
+        
+        this.isInitialized = true;
+        console.log('Wallet initialized with address:', this.walletAddress);
+        
+        return true;
       } catch (error) {
         this.lastError = {
-          method: 'initialize:getAddress',
+          method: 'initialize:sdk',
           message: error.message,
           stack: error.stack
         };
-        console.error('Failed to get wallet address:', error);
+        console.error('Failed to initialize TMA Wallet SDK:', error);
         return false;
       }
-      
-      // Update balance
-      await this.updateBalance();
-      
-      this.isInitialized = true;
-      console.log('Wallet initialized with address:', this.walletAddress);
-      
-      return true;
     } catch (error) {
       this.lastError = {
         method: 'initialize',
@@ -140,6 +117,23 @@ class WalletManager {
   }
   
   /**
+   * Wait for scripts to load
+   */
+  waitForScripts() {
+    return new Promise((resolve) => {
+      const checkScripts = () => {
+        if (window.TMAWalletSDK && window.ethers && window.solanaWeb3) {
+          resolve();
+        } else {
+          setTimeout(checkScripts, 100);
+        }
+      };
+      
+      checkScripts();
+    });
+  }
+  
+  /**
    * Update wallet balance
    */
   async updateBalance() {
@@ -148,16 +142,23 @@ class WalletManager {
         await this.initialize();
       }
       
-      if (!this.SolanaWeb3) {
-        await this.loadLibraries();
+      if (!this.walletAddress) {
+        console.error('Wallet address not available');
+        return 0;
       }
       
-      // For older Solana Web3.js version
-      const connection = new this.SolanaWeb3.Connection(this.rpcUrl);
+      // Check if Solana Web3.js is available
+      if (!window.solanaWeb3) {
+        console.error('Solana Web3.js not loaded');
+        return 0;
+      }
+      
+      // Create connection to Solana network
+      const connection = new window.solanaWeb3.Connection(this.rpcUrl);
       
       // Get balance in lamports (1 SOL = 1,000,000,000 lamports)
       const balanceInLamports = await connection.getBalance(
-        new this.SolanaWeb3.PublicKey(this.walletAddress)
+        new window.solanaWeb3.PublicKey(this.walletAddress)
       );
       
       // Convert to SOL
@@ -321,7 +322,6 @@ class WalletManager {
         <div class="wallet-actions">
           <button id="retry-init-button">Retry Initialization</button>
           <button id="update-balance-button">Update Balance</button>
-          <button id="send-welcome-button">Send Welcome Message</button>
         </div>
         <div class="wallet-message"></div>
       </div>
@@ -333,7 +333,6 @@ class WalletManager {
     const closeBtn = modal.querySelector('.wallet-modal-close');
     const retryInitBtn = modal.querySelector('#retry-init-button');
     const updateBalanceBtn = modal.querySelector('#update-balance-button');
-    const sendWelcomeBtn = modal.querySelector('#send-welcome-button');
     const messageDiv = modal.querySelector('.wallet-message');
     
     closeBtn.addEventListener('click', () => {
@@ -388,21 +387,6 @@ class WalletManager {
         // Update debug info
         const debugInfo = this.getDebugInfo();
         modal.querySelector('pre').textContent = JSON.stringify(debugInfo, null, 2);
-      }
-    });
-    
-    sendWelcomeBtn.addEventListener('click', async () => {
-      messageDiv.textContent = 'Sending welcome message...';
-      messageDiv.className = 'wallet-message info';
-      
-      const success = await this.sendWelcomeMessage();
-      
-      if (success) {
-        messageDiv.textContent = 'Welcome message sent successfully!';
-        messageDiv.className = 'wallet-message success';
-      } else {
-        messageDiv.textContent = 'Failed to send welcome message. See console for details.';
-        messageDiv.className = 'wallet-message error';
       }
     });
   }
@@ -565,86 +549,6 @@ class WalletManager {
       }
     });
   }
-  
-  /**
-   * Send a welcome message to the user via Telegram
-   */
-  async sendWelcomeMessage() {
-    try {
-      if (!window.Telegram?.WebApp) {
-        console.error('Telegram WebApp is not available');
-        return false;
-      }
-      
-      // Get user data from Telegram WebApp
-      const user = window.Telegram.WebApp.initDataUnsafe?.user;
-      if (!user) {
-        console.error('Could not get user data from Telegram WebApp');
-        return false;
-      }
-      
-      const chatId = user.id;
-      if (!chatId) {
-        console.error('Could not get user chat ID');
-        return false;
-      }
-      
-      console.log('Sending welcome message to user:', user.username || user.first_name || chatId);
-      
-      const welcomeMessage = `
-<b>🎰 Welcome to Sizzling Hot™ deluxe Slot Machine! 🎰</b>
-
-Hello ${user.first_name || 'there'}! 
-
-Your wallet status: <b>${this.isInitialized ? 'Connected' : 'Not Connected'}</b>
-${this.walletAddress ? `Wallet Address: <code>${this.walletAddress}</code>` : ''}
-${this.balance > 0 ? `Balance: <b>${this.balance.toFixed(4)} SOL</b>` : ''}
-
-<b>Network:</b> ${this.network.toUpperCase()}
-
-<b>Get started:</b>
-1. Click the WALLET DEBUG button
-2. Connect your wallet
-3. Make a deposit
-4. Spin and win!
-
-<i>Message sent at: ${new Date().toLocaleTimeString()}</i>
-`;
-      
-      console.log('Attempting to send message to chat ID:', chatId);
-      
-      // Send the message using our API endpoint
-      const response = await fetch('/api/send-message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chatId: chatId,
-          message: welcomeMessage
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server responded with error:', response.status, errorText);
-        return false;
-      }
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        console.log('Welcome message sent successfully');
-        return true;
-      } else {
-        console.error('Failed to send welcome message:', result.error);
-        return false;
-      }
-    } catch (error) {
-      console.error('Error sending welcome message:', error);
-      return false;
-    }
-  }
 }
 
 // Create global wallet manager instance
@@ -661,17 +565,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Initialize the wallet
       const success = await walletManager.initialize();
       console.log('Wallet initialization result:', success ? 'Success' : 'Failed');
-      
-      // Send welcome message after initialization (with delay to ensure everything is loaded)
-      setTimeout(async () => {
-        console.log('Attempting to send welcome message');
-        try {
-          const messageSent = await walletManager.sendWelcomeMessage();
-          console.log('Welcome message sent:', messageSent ? 'Success' : 'Failed');
-        } catch (error) {
-          console.error('Error sending welcome message:', error);
-        }
-      }, 3000);
     } catch (error) {
       console.error('Error during wallet initialization:', error);
     }
