@@ -5,7 +5,7 @@
 class WalletManager {
   constructor() {
     // Replace with your actual API key from TMA Wallet Dashboard
-    this.apiKey = 'YOUR_TMA_WALLET_API_KEY';
+    this.apiKey = '4973ae7778a7bbf0';
     this.isInitialized = false;
     this.walletAddress = null;
     this.balance = 0;
