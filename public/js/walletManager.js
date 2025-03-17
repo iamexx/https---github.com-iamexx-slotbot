@@ -5,7 +5,7 @@
 class WalletManager {
   constructor() {
     // Replace with your actual API key from TMA Wallet Dashboard
-    this.apiKey = '4973ae7778a7bbf0';
+    this.apiKey = 'YOUR_TMA_WALLET_API_KEY';
     this.isInitialized = false;
     this.walletAddress = null;
     this.balance = 0;
@@ -16,7 +16,24 @@ class WalletManager {
     this.network = 'devnet'; // 'devnet' or 'mainnet'
     this.rpcUrl = 'https://api.devnet.solana.com';
     
+    // Load required libraries
+    this.loadLibraries();
+    
     console.log('Wallet Manager initialized');
+  }
+  
+  /**
+   * Load required libraries
+   */
+  async loadLibraries() {
+    try {
+      // For older versions, we need to load the libraries differently
+      this.TMAWalletSDK = await import('/@tmawallet/sdk');
+      this.SolanaWeb3 = await import('/@solana/web3.js');
+      console.log('Libraries loaded successfully');
+    } catch (error) {
+      console.error('Failed to load libraries:', error);
+    }
   }
   
   /**
@@ -29,19 +46,21 @@ class WalletManager {
         return false;
       }
       
-      // Import required modules
-      const { TMAWalletClient } = await import('/@tmawallet/sdk');
-      const { TMAWalletSolana } = await import('/@tmawallet/sdk/dist/wallets/TMAWallet.Solana');
+      if (!this.TMAWalletSDK) {
+        await this.loadLibraries();
+      }
       
-      // Create client and wallet
-      this.client = new TMAWalletClient(this.apiKey);
-      this.solanaWallet = new TMAWalletSolana(this.client);
+      // Create client and wallet (using older SDK version)
+      this.client = new this.TMAWalletSDK.TMAWalletClient(this.apiKey);
+      
+      // For older SDK version, we need to create the wallet differently
+      this.solanaWallet = this.client.getSolanaWallet();
       
       // Authenticate user (creates a new wallet if needed)
       await this.solanaWallet.authenticate();
       
       // Get wallet address
-      this.walletAddress = this.solanaWallet.walletAddress;
+      this.walletAddress = this.solanaWallet.getAddress();
       
       // Update balance
       await this.updateBalance();
@@ -65,11 +84,17 @@ class WalletManager {
         await this.initialize();
       }
       
-      const { createSolanaRpc } = await import('/@solana/web3.js');
-      const rpc = createSolanaRpc(this.rpcUrl);
+      if (!this.SolanaWeb3) {
+        await this.loadLibraries();
+      }
+      
+      // For older Solana Web3.js version
+      const connection = new this.SolanaWeb3.Connection(this.rpcUrl);
       
       // Get balance in lamports (1 SOL = 1,000,000,000 lamports)
-      const balanceInLamports = await rpc.getBalance(this.walletAddress);
+      const balanceInLamports = await connection.getBalance(
+        new this.SolanaWeb3.PublicKey(this.walletAddress)
+      );
       
       // Convert to SOL
       this.balance = balanceInLamports / 1_000_000_000;
