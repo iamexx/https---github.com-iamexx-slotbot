@@ -6,46 +6,33 @@ const TelegramBot = require('node-telegram-bot-api');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Telegram Bot configuration
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN';
-const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
-
 // Log startup information
 console.log('Starting Sizzling Hot Slots server...');
 console.log(`Node version: ${process.version}`);
 console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 
-// Serve static files from the public directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Telegram Bot configuration
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN') {
+  console.error('ERROR: Telegram bot token is not configured properly in .env file');
+  console.error('Please set a valid TELEGRAM_BOT_TOKEN in your .env file');
+}
 
-// Serve node_modules for client-side imports
-app.use('/@tmawallet/sdk', express.static(path.join(__dirname, 'node_modules/@tmawallet/sdk')));
-app.use('/@solana/web3.js', express.static(path.join(__dirname, 'node_modules/@solana/web3.js')));
+console.log('Initializing Telegram bot...');
+console.log(`Using bot token: ${TELEGRAM_BOT_TOKEN ? TELEGRAM_BOT_TOKEN.substring(0, 5) + '...' : 'Not configured'}`);
 
-// Parse JSON bodies
-app.use(express.json());
-
-// API endpoint to send a message to a specific user
-app.post('/api/send-message', async (req, res) => {
-  try {
-    const { chatId, message } = req.body;
+// Initialize the bot with polling
+let bot;
+try {
+  bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
+  console.log('Telegram bot initialized successfully');
+  
+  // Bot commands
+  bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id;
+    console.log(`Received /start command from chat ID: ${chatId}`);
     
-    if (!chatId || !message) {
-      return res.status(400).json({ success: false, error: 'Chat ID and message are required' });
-    }
-    
-    const result = await bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
-    res.json({ success: true, result });
-  } catch (error) {
-    console.error('Error sending message:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Bot commands
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  const welcomeMessage = `
+    const welcomeMessage = `
 <b>🎰 Welcome to Sizzling Hot™ deluxe Slot Machine! 🎰</b>
 
 Play our exciting slot game with Solana integration!
@@ -61,16 +48,101 @@ Play our exciting slot game with Solana integration!
 2. Connect your wallet
 3. Make a deposit
 4. Spin and win!
-
-<a href="https://t.me/YourBotUsername">Play Now!</a>
 `;
+    
+    bot.sendMessage(chatId, welcomeMessage, { parse_mode: 'HTML' })
+      .then(() => console.log(`Welcome message sent to chat ID: ${chatId}`))
+      .catch(error => console.error(`Error sending welcome message: ${error.message}`));
+  });
   
-  bot.sendMessage(chatId, welcomeMessage, { parse_mode: 'HTML' });
+  // Handle bot errors
+  bot.on('polling_error', (error) => {
+    console.error('Telegram bot polling error:', error.message || error);
+  });
+} catch (error) {
+  console.error('Failed to initialize Telegram bot:', error.message || error);
+  bot = null;
+}
+
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve node_modules for client-side imports
+app.use('/@tmawallet/sdk', express.static(path.join(__dirname, 'node_modules/@tmawallet/sdk')));
+app.use('/@solana/web3.js', express.static(path.join(__dirname, 'node_modules/@solana/web3.js')));
+
+// Parse JSON bodies
+app.use(express.json());
+
+// API endpoint to send a message to a specific user
+app.post('/api/send-message', async (req, res) => {
+  try {
+    if (!bot) {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Telegram bot is not initialized' 
+      });
+    }
+    
+    const { chatId, message } = req.body;
+    
+    if (!chatId || !message) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Chat ID and message are required' 
+      });
+    }
+    
+    console.log(`Sending message to chat ID: ${chatId}`);
+    console.log(`Message content: ${message.substring(0, 50)}...`);
+    
+    const result = await bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
+    console.log('Message sent successfully');
+    res.json({ success: true, result });
+  } catch (error) {
+    console.error('Error sending message:', error.message || error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Unknown error' 
+    });
+  }
 });
 
-// Handle bot errors
-bot.on('polling_error', (error) => {
-  console.error('Telegram bot polling error:', error);
+// Send a test message to verify bot functionality
+app.get('/api/test-bot', async (req, res) => {
+  try {
+    if (!bot) {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Telegram bot is not initialized' 
+      });
+    }
+    
+    const chatId = req.query.chatId;
+    
+    if (!chatId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Chat ID is required as a query parameter' 
+      });
+    }
+    
+    const testMessage = `
+<b>🎰 Test Message from Sizzling Hot™ deluxe Slot Machine! 🎰</b>
+
+This is a test message to verify that the bot is working correctly.
+Time: ${new Date().toISOString()}
+`;
+    
+    const result = await bot.sendMessage(chatId, testMessage, { parse_mode: 'HTML' });
+    res.json({ success: true, result });
+  } catch (error) {
+    console.error('Error sending test message:', error.message || error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Unknown error' 
+    });
+  }
 });
 
 // Serve the main HTML file for all routes (SPA style)
@@ -82,5 +154,12 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Open http://localhost:${PORT} in your browser`);
-  console.log('Telegram bot is active and ready to send messages');
+  
+  if (bot) {
+    console.log('Telegram bot is active and ready to send messages');
+    console.log('To test the bot, visit:');
+    console.log(`http://localhost:${PORT}/api/test-bot?chatId=YOUR_CHAT_ID`);
+  } else {
+    console.log('WARNING: Telegram bot is not active. Welcome messages will not be sent.');
+  }
 }); 

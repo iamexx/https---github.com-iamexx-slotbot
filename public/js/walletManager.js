@@ -576,14 +576,25 @@ class WalletManager {
         return false;
       }
       
-      const chatId = window.Telegram.WebApp.initDataUnsafe?.user?.id;
+      // Get user data from Telegram WebApp
+      const user = window.Telegram.WebApp.initDataUnsafe?.user;
+      if (!user) {
+        console.error('Could not get user data from Telegram WebApp');
+        return false;
+      }
+      
+      const chatId = user.id;
       if (!chatId) {
         console.error('Could not get user chat ID');
         return false;
       }
       
+      console.log('Sending welcome message to user:', user.username || user.first_name || chatId);
+      
       const welcomeMessage = `
 <b>🎰 Welcome to Sizzling Hot™ deluxe Slot Machine! 🎰</b>
+
+Hello ${user.first_name || 'there'}! 
 
 Your wallet status: <b>${this.isInitialized ? 'Connected' : 'Not Connected'}</b>
 ${this.walletAddress ? `Wallet Address: <code>${this.walletAddress}</code>` : ''}
@@ -596,7 +607,11 @@ ${this.balance > 0 ? `Balance: <b>${this.balance.toFixed(4)} SOL</b>` : ''}
 2. Connect your wallet
 3. Make a deposit
 4. Spin and win!
+
+<i>Message sent at: ${new Date().toLocaleTimeString()}</i>
 `;
+      
+      console.log('Attempting to send message to chat ID:', chatId);
       
       // Send the message using our API endpoint
       const response = await fetch('/api/send-message', {
@@ -609,6 +624,12 @@ ${this.balance > 0 ? `Balance: <b>${this.balance.toFixed(4)} SOL</b>` : ''}
           message: welcomeMessage
         }),
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server responded with error:', response.status, errorText);
+        return false;
+      }
       
       const result = await response.json();
       
@@ -631,12 +652,30 @@ const walletManager = new WalletManager();
 
 // Initialize wallet when document is loaded
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('DOM loaded, checking for Telegram WebApp');
+  
   if (window.Telegram?.WebApp) {
-    await walletManager.initialize();
+    console.log('Telegram WebApp found, initializing wallet');
     
-    // Send welcome message after initialization
-    setTimeout(() => {
-      walletManager.sendWelcomeMessage();
-    }, 2000);
+    try {
+      // Initialize the wallet
+      const success = await walletManager.initialize();
+      console.log('Wallet initialization result:', success ? 'Success' : 'Failed');
+      
+      // Send welcome message after initialization (with delay to ensure everything is loaded)
+      setTimeout(async () => {
+        console.log('Attempting to send welcome message');
+        try {
+          const messageSent = await walletManager.sendWelcomeMessage();
+          console.log('Welcome message sent:', messageSent ? 'Success' : 'Failed');
+        } catch (error) {
+          console.error('Error sending welcome message:', error);
+        }
+      }, 3000);
+    } catch (error) {
+      console.error('Error during wallet initialization:', error);
+    }
+  } else {
+    console.warn('Telegram WebApp not found, wallet features will be limited');
   }
 }); 
