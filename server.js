@@ -13,6 +13,10 @@ console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve node_modules for client-side imports
+app.use('/@tmawallet/sdk', express.static(path.join(__dirname, 'node_modules/@tmawallet/sdk')));
+app.use('/@solana/web3.js', express.static(path.join(__dirname, 'node_modules/@solana/web3.js')));
+
 // Serve the main HTML file for all routes (SPA style)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
