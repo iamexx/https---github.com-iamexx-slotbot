@@ -7,35 +7,61 @@
   <link rel="stylesheet" href="css/style.css">
   <!-- Telegram Mini App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
-  <!-- GSAP for animations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
   <div id="app">
     <div id="game-container">
-      <canvas id="game-canvas"></canvas>
-      <div id="ui-container">
-        <div id="balance-display">Balance: <span id="balance">1000</span></div>
-        <div id="bet-controls">
-          <button id="bet-decrease">-</button>
-          <div id="current-bet">Bet: <span id="bet-amount">10</span></div>
-          <button id="bet-increase">+</button>
+      <div id="slot-machine">
+        <div class="slot-header">
+          <h1>Sizzling Hot Slots</h1>
         </div>
-        <button id="spin-button">SPIN</button>
-        <div id="win-message"></div>
+        <div id="reels-container">
+          <div class="reel" id="reel1">
+            <div class="symbol">🍒</div>
+            <div class="symbol">🍇</div>
+            <div class="symbol">🍉</div>
+          </div>
+          <div class="reel" id="reel2">
+            <div class="symbol">🍊</div>
+            <div class="symbol">🍋</div>
+            <div class="symbol">🍑</div>
+          </div>
+          <div class="reel" id="reel3">
+            <div class="symbol">7️⃣</div>
+            <div class="symbol">⭐</div>
+            <div class="symbol">🍒</div>
+          </div>
+          <div class="reel" id="reel4">
+            <div class="symbol">🍇</div>
+            <div class="symbol">🍉</div>
+            <div class="symbol">🍊</div>
+          </div>
+          <div class="reel" id="reel5">
+            <div class="symbol">🍋</div>
+            <div class="symbol">🍑</div>
+            <div class="symbol">7️⃣</div>
+          </div>
+        </div>
+        <canvas id="win-effect-canvas"></canvas>
+        <div id="ui-container">
+          <div id="balance-display">Balance: <span id="balance">1000</span></div>
+          <div id="bet-controls">
+            <button id="bet-decrease">-</button>
+            <div id="current-bet">Bet: <span id="bet-amount">10</span></div>
+            <button id="bet-increase">+</button>
+          </div>
+          <button id="spin-button">SPIN</button>
+          <div id="win-message"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Game modules -->
+  <!-- Game scripts -->
   <script src="js/config.js"></script>
   <script src="js/symbols.js"></script>
   <script src="js/slotMachine.js"></script>
-  <script src="js/paylines.js"></script>
+  <script src="js/winEffects.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html> 

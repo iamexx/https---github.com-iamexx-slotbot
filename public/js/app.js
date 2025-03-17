@@ -19,14 +19,13 @@ const betDecreaseButton = document.getElementById('bet-decrease');
 const betIncreaseButton = document.getElementById('bet-increase');
 const winMessageElement = document.getElementById('win-message');
 
-// Three.js variables
-let scene, camera, renderer, slotMachine;
-let animationId;
+// Slot machine instance
+let slotMachine;
 
 // Initialize the game
 function init() {
-  // Set up Three.js scene
-  setupScene();
+  // Create slot machine
+  slotMachine = new SlotMachine();
   
   // Set up event listeners
   setupEventListeners();
@@ -38,52 +37,6 @@ function init() {
   if (tg) {
     initTelegramApp();
   }
-  
-  // Start animation loop
-  animate();
-}
-
-// Set up Three.js scene
-function setupScene() {
-  // Create scene
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(CONFIG.colors.background);
-  
-  // Create camera
-  camera = new THREE.PerspectiveCamera(
-    45,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  camera.position.set(
-    CONFIG.cameraPosition.x,
-    CONFIG.cameraPosition.y,
-    CONFIG.cameraPosition.z
-  );
-  camera.lookAt(0, 0, 0);
-  
-  // Create renderer
-  renderer = new THREE.WebGLRenderer({
-    canvas: document.getElementById('game-canvas'),
-    antialias: true
-  });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  
-  // Add lights
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-  scene.add(ambientLight);
-  
-  const directionalLight = new THREE.DirectionalLight(0xffffff, CONFIG.lightIntensity);
-  directionalLight.position.set(5, 5, 5);
-  scene.add(directionalLight);
-  
-  // Create slot machine
-  slotMachine = new SlotMachine(scene, camera);
-  
-  // Handle window resize
-  window.addEventListener('resize', onWindowResize);
 }
 
 // Set up event listeners
@@ -206,28 +159,13 @@ async function spin() {
   // Add winnings to balance
   balance += winResult.totalWinnings;
   
-  // Show winning paylines
-  const message = slotMachine.showWinningPaylines(winResult);
+  // Show winning effects
+  const message = slotMachine.showWinningEffects(winResult);
   winMessageElement.textContent = message;
   
   // Reset spinning state
   isSpinning = false;
   updateUI();
-}
-
-// Animation loop
-function animate() {
-  animationId = requestAnimationFrame(animate);
-  
-  // Render the scene
-  renderer.render(scene, camera);
-}
-
-// Handle window resize
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 // Initialize the game when the DOM is loaded
