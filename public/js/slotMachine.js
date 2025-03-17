@@ -118,9 +118,9 @@ class SlotMachine {
       // Draw paylines
       this.winEffects.drawPaylines(winResult.winningLines);
       
-      // Show particle effects
+      // Show coin shower effect with win amount
       setTimeout(() => {
-        this.winEffects.showWinEffect(winResult.winningLines);
+        this.winEffects.showWinEffect(winResult.winningLines, winResult.totalWinnings);
       }, 1500);
     }
     

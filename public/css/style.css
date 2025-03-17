@@ -9,6 +9,7 @@ body {
   background-color: #1a1a2e;
   color: white;
   overflow: hidden;
+  background-image: radial-gradient(circle at center, #2a2a4e 0%, #1a1a2e 100%);
 }
 
 #app {
@@ -28,14 +29,19 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
 }
 
 #slot-machine {
   width: 100%;
   height: 100%;
   background-color: #8B4513;
+  background-image: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
   border-radius: 10px;
   border: 8px solid #D4AF37;
+  box-shadow: 
+    inset 0 0 10px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(255, 215, 0, 0.5);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -44,8 +50,12 @@ body {
 
 .slot-header {
   background-color: #D4AF37;
+  background-image: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
   padding: 10px;
   text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
 }
 
 .slot-header h1 {
@@ -53,15 +63,18 @@ body {
   color: #8B4513;
   font-size: 24px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
 }
 
 #reels-container {
   display: flex;
   justify-content: space-around;
   background-color: #000;
+  background-image: linear-gradient(to bottom, #222, #000);
   padding: 20px;
   flex-grow: 1;
   position: relative;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
 }
 
 .reel {
@@ -72,6 +85,8 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  border: 2px solid #D4AF37;
 }
 
 .symbol {
@@ -91,7 +106,17 @@ body {
 
 .symbol.highlight {
   background-color: #ffeb3b;
-  box-shadow: 0 0 10px #ffeb3b;
+  box-shadow: 0 0 15px #ffd700;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 15px #ffd700;
+  }
+  100% {
+    box-shadow: 0 0 25px #ffd700, 0 0 40px #ffd700;
+  }
 }
 
 #win-effect-canvas {
@@ -106,10 +131,12 @@ body {
 
 #ui-container {
   background-color: #333;
+  background-image: linear-gradient(to bottom, #444, #222);
   padding: 15px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  border-top: 3px solid #D4AF37;
 }
 
 #balance-display {
@@ -119,6 +146,8 @@ body {
   margin-bottom: 10px;
   font-size: 18px;
   font-weight: bold;
+  border: 1px solid #D4AF37;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
 #bet-controls {
@@ -128,10 +157,12 @@ body {
   background-color: rgba(0, 0, 0, 0.7);
   padding: 5px 15px;
   border-radius: 20px;
+  border: 1px solid #D4AF37;
 }
 
 #bet-decrease, #bet-increase {
   background-color: #e94560;
+  background-image: linear-gradient(to bottom, #e94560, #c13050);
   color: white;
   border: none;
   width: 30px;
@@ -142,15 +173,19 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 #current-bet {
   margin: 0 15px;
   font-size: 16px;
+  color: #ffd700;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
 }
 
 #spin-button {
   background-color: #e94560;
+  background-image: linear-gradient(to bottom, #e94560, #c13050);
   color: white;
   border: none;
   padding: 12px 40px;
@@ -159,22 +194,32 @@ body {
   font-weight: bold;
   cursor: pointer;
   transition: transform 0.2s, background-color 0.2s;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 0 15px rgba(233, 69, 96, 0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  border: 2px solid #ffd700;
 }
 
 #spin-button:hover {
-  background-color: #ff6b81;
+  background-image: linear-gradient(to bottom, #ff6b81, #e94560);
   transform: scale(1.05);
+  box-shadow: 
+    0 6px 12px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(233, 69, 96, 0.7);
 }
 
 #spin-button:active {
   transform: scale(0.95);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 #spin-button:disabled {
-  background-color: #666;
+  background-image: linear-gradient(to bottom, #666, #444);
   cursor: not-allowed;
   transform: none;
+  border-color: #888;
+  box-shadow: none;
 }
 
 #win-message {
