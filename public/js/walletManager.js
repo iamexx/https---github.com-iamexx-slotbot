@@ -14,7 +14,7 @@ class WalletManager {
     this.lastError = null;
     this.debugInfo = {};
     
-    // Network configuration
+    // Network configuration - use testnet for Glitch deployment
     this.network = 'testnet'; // 'devnet', 'testnet', or 'mainnet'
     this.rpcUrl = 'https://api.testnet.solana.com';
     
@@ -29,19 +29,19 @@ class WalletManager {
    */
   loadScripts() {
     try {
-      // Load TMA Wallet SDK
+      // Load TMA Wallet SDK - use specific version for Node.js 14 compatibility
       const tmaScript = document.createElement('script');
-      tmaScript.src = '/@tmawallet/sdk/dist/index.js';
+      tmaScript.src = 'https://unpkg.com/@tmawallet/sdk@1.3.11/dist/index.js';
       tmaScript.type = 'text/javascript';
       document.head.appendChild(tmaScript);
       
-      // Load Solana Web3.js
+      // Load Solana Web3.js - use specific version for Node.js 14 compatibility
       const solanaScript = document.createElement('script');
-      solanaScript.src = '/@solana/web3.js/lib/index.iife.js';
+      solanaScript.src = 'https://unpkg.com/@solana/web3.js@1.73.3/lib/index.iife.js';
       solanaScript.type = 'text/javascript';
       document.head.appendChild(solanaScript);
       
-      console.log('SDK scripts loaded');
+      console.log('SDK scripts loaded from CDN for compatibility');
     } catch (error) {
       console.error('Failed to load SDK scripts:', error);
     }
@@ -74,16 +74,16 @@ class WalletManager {
         this.client = new window.TMAWalletSDK.TMAWalletClient(this.apiKey);
         this.debugInfo.clientCreated = !!this.client;
         
-        // Create Solana wallet
-        this.solanaWallet = new window.TMAWalletSDK.TMAWalletSolana(this.client);
+        // Create Solana wallet - use older version compatible approach
+        this.solanaWallet = this.client.getSolanaWallet();
         this.debugInfo.solanaWalletCreated = !!this.solanaWallet;
         
         // Authenticate user (creates a new wallet if needed)
         await this.solanaWallet.authenticate();
         this.debugInfo.authenticated = true;
         
-        // Get wallet address
-        this.walletAddress = this.solanaWallet.walletAddress;
+        // Get wallet address - use getAddress() method for older versions
+        this.walletAddress = await this.solanaWallet.getAddress();
         this.debugInfo.walletAddress = this.walletAddress;
         
         console.log('Your wallet address: ', this.walletAddress);
@@ -124,10 +124,13 @@ class WalletManager {
   waitForScripts() {
     return new Promise((resolve) => {
       const checkScripts = () => {
+        // Check for global objects from the loaded scripts
         if (window.TMAWalletSDK && window.solanaWeb3) {
+          console.log('SDK scripts detected in global scope');
           resolve();
         } else {
-          setTimeout(checkScripts, 100);
+          console.log('Waiting for SDK scripts to load...');
+          setTimeout(checkScripts, 500);
         }
       };
       
@@ -155,7 +158,7 @@ class WalletManager {
         return 0;
       }
       
-      // Create connection to Solana network
+      // Create connection to Solana network - use older version compatible approach
       const connection = new window.solanaWeb3.Connection(this.rpcUrl);
       
       // Get balance in lamports (1 SOL = 1,000,000,000 lamports)
@@ -197,14 +200,14 @@ class WalletManager {
         await this.initialize();
       }
       
-      // Create a new wallet
-      this.solanaWallet = new window.TMAWalletSDK.TMAWalletSolana(this.client);
+      // Create a new wallet - use older version compatible approach
+      this.solanaWallet = this.client.getSolanaWallet();
       
       // Force creation of a new wallet
       await this.solanaWallet.authenticate({ forceNewWallet: true });
       
       // Get new wallet address
-      this.walletAddress = this.solanaWallet.walletAddress;
+      this.walletAddress = await this.solanaWallet.getAddress();
       
       // Update balance
       await this.updateBalance();
