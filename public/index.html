@@ -10,6 +10,7 @@
   <!-- Game Scripts -->
   <script src="js/slotMachine.js"></script>
   <script src="js/winEffects.js"></script>
+  <script src="js/walletManager.js"></script>
   <script src="js/main.js"></script>
 </head>
 <body>
@@ -71,6 +72,9 @@
               <input type="checkbox" id="auto-spin">
             </div>
             <button id="paytable-button">PAYTABLE</button>
+            <button id="wallet-button" class="wallet-button">
+              <span class="wallet-icon">👛</span> WALLET
+            </button>
           </div>
         </div>
       </div>
@@ -137,6 +141,36 @@
           <h3>5 Win Lines</h3>
           <p>Winning combinations start from the leftmost reel and run along the win line to the right.</p>
           <p>Scatter symbols (⭐) pay in any position.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Wallet Modal -->
+    <div id="wallet-modal" class="wallet-modal">
+      <div class="wallet-modal-content">
+        <div class="wallet-modal-header">
+          <h2>Wallet Manager</h2>
+          <span class="wallet-close-button">&times;</span>
+        </div>
+        <div class="wallet-info">
+          <div class="wallet-info-row">
+            <span class="wallet-info-label">Network:</span>
+            <span class="wallet-info-value" id="wallet-network">TESTNET</span>
+          </div>
+          <div class="wallet-info-row">
+            <span class="wallet-info-label">Address:</span>
+            <span class="wallet-info-value wallet-address" id="wallet-address" title="Click to copy">Loading...</span>
+          </div>
+          <div class="wallet-info-row">
+            <span class="wallet-info-label">Balance:</span>
+            <span class="wallet-info-value" id="wallet-balance">0.000000 SOL</span>
+          </div>
+        </div>
+        <div class="wallet-actions">
+          <button id="create-wallet-btn" class="wallet-action-button">Create Wallet</button>
+          <button id="topup-wallet-btn" class="wallet-action-button">Top Up Wallet</button>
+          <button id="withdraw-wallet-btn" class="wallet-action-button disabled">Withdraw</button>
+          <button id="delete-wallet-btn" class="wallet-action-button">Delete Wallet</button>
         </div>
       </div>
     </div>
