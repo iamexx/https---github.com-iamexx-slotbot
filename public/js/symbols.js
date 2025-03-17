@@ -1,9 +1,75 @@
 /**
+ * Symbol definitions
+ */
+const SYMBOLS = {
+  CHERRY: 'CHERRY',
+  GRAPES: 'GRAPES',
+  WATERMELON: 'WATERMELON',
+  ORANGE: 'ORANGE',
+  LEMON: 'LEMON',
+  PEACH: 'PEACH',
+  SEVEN: 'SEVEN',
+  STAR: 'STAR',
+  WILD: 'WILD'
+};
+
+/**
+ * Symbol configuration
+ */
+const SYMBOLS_CONFIG = {
+  [SYMBOLS.CHERRY]: {
+    emoji: '🍒',
+    weight: 20,
+    payouts: [2, 5, 10] // 3, 4, 5 of a kind
+  },
+  [SYMBOLS.GRAPES]: {
+    emoji: '🍇',
+    weight: 15,
+    payouts: [3, 8, 15]
+  },
+  [SYMBOLS.WATERMELON]: {
+    emoji: '🍉',
+    weight: 10,
+    payouts: [5, 10, 20]
+  },
+  [SYMBOLS.ORANGE]: {
+    emoji: '🍊',
+    weight: 15,
+    payouts: [3, 8, 15]
+  },
+  [SYMBOLS.LEMON]: {
+    emoji: '🍋',
+    weight: 20,
+    payouts: [2, 5, 10]
+  },
+  [SYMBOLS.PEACH]: {
+    emoji: '🍑',
+    weight: 20,
+    payouts: [2, 5, 10]
+  },
+  [SYMBOLS.SEVEN]: {
+    emoji: '7️⃣',
+    weight: 5,
+    payouts: [10, 25, 50]
+  },
+  [SYMBOLS.STAR]: {
+    emoji: '⭐',
+    weight: 10,
+    payouts: [5, 15, 30]
+  },
+  [SYMBOLS.WILD]: {
+    emoji: '🃏',
+    weight: 5,
+    payouts: [10, 25, 100]
+  }
+};
+
+/**
  * Class to handle the creation and management of slot symbols
  */
 class SymbolManager {
   constructor() {
-    this.symbolMap = CONFIG.symbols;
+    this.symbolMap = SYMBOLS_CONFIG;
   }
   
   /**
@@ -18,7 +84,7 @@ class SymbolManager {
    */
   getRandomSymbolName() {
     const symbols = Object.keys(this.symbolMap);
-    const weights = symbols.map(symbol => this.symbolMap[symbol].probability);
+    const weights = symbols.map(symbol => this.symbolMap[symbol].weight);
     
     // Calculate total weight
     const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);

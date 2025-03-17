@@ -160,7 +160,7 @@ body {
   border: 1px solid #D4AF37;
 }
 
-#bet-decrease, #bet-increase {
+#bet-minus, #bet-plus {
   background-color: #e94560;
   background-image: linear-gradient(to bottom, #e94560, #c13050);
   color: white;
@@ -222,14 +222,47 @@ body {
   box-shadow: none;
 }
 
-#win-message {
+#win-display {
   margin-top: 15px;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   color: #ffd700;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-  height: 30px;
   text-align: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1px solid #D4AF37;
+}
+
+#win-amount.win-highlight {
+  animation: win-pulse 0.5s infinite alternate;
+  font-size: 24px;
+}
+
+@keyframes win-pulse {
+  0% {
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  }
+  100% {
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 1);
+  }
+}
+
+.auto-spin-container {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffd700;
+}
+
+.auto-spin-container input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 
 /* Spinning animation */

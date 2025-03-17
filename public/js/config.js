@@ -2,51 +2,21 @@
  * Game configuration
  */
 const CONFIG = {
-  // Game settings
-  reels: 5,
-  rows: 3,
-  defaultBalance: 1000,
-  defaultBet: 10,
-  betOptions: [5, 10, 25, 50, 100],
+  // Initial values
+  initialBalance: 1000,
+  minBet: 5,
+  maxBet: 100,
+  betStep: 5,
+  autoSpinDelay: 1000,
   
-  // Animation settings
-  spinDuration: 2000, // milliseconds
-  reelStaggerDelay: 200, // milliseconds between each reel stopping
-  
-  // Symbols
-  symbols: {
-    'cherry': {
-      emoji: '🍒',
-      probability: 20
-    },
-    'grapes': {
-      emoji: '🍇',
-      probability: 15
-    },
-    'watermelon': {
-      emoji: '🍉',
-      probability: 10
-    },
-    'orange': {
-      emoji: '🍊',
-      probability: 15
-    },
-    'lemon': {
-      emoji: '🍋',
-      probability: 20
-    },
-    'peach': {
-      emoji: '🍑',
-      probability: 20
-    },
-    'seven': {
-      emoji: '7️⃣',
-      probability: 5
-    },
-    'star': {
-      emoji: '⭐',
-      probability: 10
-    }
+  // Reel configuration
+  reels: {
+    count: 5,
+    visibleSymbols: 3,
+    symbolsPerReel: 3,
+    spinDuration: 1000,
+    spinDurationIncrement: 200,
+    spinStartDelay: 200
   },
   
   // Paylines (row indices for each column)
@@ -58,22 +28,10 @@ const CONFIG = {
     [2, 1, 0, 1, 2]  // Inverted V shape
   ],
   
-  // Payout multipliers for 3, 4, or 5 matching symbols
-  payouts: {
-    'cherry': [2, 4, 8],
-    'grapes': [3, 6, 12],
-    'watermelon': [4, 8, 16],
-    'orange': [3, 6, 12],
-    'lemon': [2, 4, 8],
-    'peach': [2, 4, 8],
-    'seven': [10, 20, 50],
-    'star': [5, 10, 25] // Scatter, pays anywhere
-  },
-  
   // Win effect settings
   winEffects: {
+    duration: 3000,
     particleCount: 100,
-    particleColors: ['#FFD700', '#FF6347', '#7FFF00', '#FF00FF', '#00FFFF'],
-    duration: 2000
+    particleColors: ['#FFD700', '#FF6347', '#7FFF00', '#FF00FF', '#00FFFF']
   }
 }; 
