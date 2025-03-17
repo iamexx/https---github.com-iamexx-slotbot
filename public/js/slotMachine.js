@@ -16,6 +16,7 @@ class SlotMachine {
     this.balance = document.getElementById('balance');
     this.autoSpinCheckbox = document.getElementById('auto-spin');
     this.isSpinning = false;
+    this.currentWinningPositions = []; // Store current winning positions
     
     // Set game title
     document.querySelector('.slot-header h1').textContent = CONFIG.gameName;
@@ -62,6 +63,41 @@ class SlotMachine {
   }
   
   /**
+   * Highlight winning symbols
+   */
+  highlightWinningSymbols(winningLines) {
+    // Clear any previous highlights
+    this.clearHighlights();
+    
+    // Store current winning positions
+    this.currentWinningPositions = [];
+    
+    // Highlight all winning symbols
+    winningLines.forEach(line => {
+      line.positions.forEach(pos => {
+        const element = document.querySelector(`#reel${pos.col + 1} .symbol:nth-child(${pos.row + 1})`);
+        if (element) {
+          element.classList.add('highlight');
+          this.currentWinningPositions.push({
+            col: pos.col,
+            row: pos.row
+          });
+        }
+      });
+    });
+  }
+  
+  /**
+   * Clear all highlighted symbols
+   */
+  clearHighlights() {
+    document.querySelectorAll('.symbol.highlight').forEach(el => {
+      el.classList.remove('highlight');
+    });
+    this.currentWinningPositions = [];
+  }
+  
+  /**
    * Spin the reels
    */
   spin() {
@@ -71,6 +107,9 @@ class SlotMachine {
     }
     
     console.log('Spinning reels...');
+    
+    // Clear any previous highlights
+    this.clearHighlights();
     
     // Play spin sound
     playSound('spin');
@@ -130,6 +169,9 @@ class SlotMachine {
         
         // Show win effects
         this.showWinningEffects(winResult);
+        
+        // Highlight winning symbols
+        this.highlightWinningSymbols(winResult.winningLines);
       }
       
       // Auto spin if enabled

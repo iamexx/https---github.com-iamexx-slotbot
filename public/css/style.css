@@ -105,25 +105,37 @@ body {
 }
 
 .symbol.highlight {
-  background-color: #ffeb3b;
-  box-shadow: 0 0 15px #ffd700;
-  animation: pulse 1s infinite alternate;
+  background-color: rgba(255, 235, 59, 0.8);
+  box-shadow: 
+    inset 0 0 15px #ffd700,
+    0 0 20px rgba(255, 215, 0, 0.7);
+  animation: highlight-pulse 1.5s infinite alternate;
   position: relative;
   z-index: 5;
+  border: 2px solid #ffd700;
 }
 
-@keyframes pulse {
+@keyframes highlight-pulse {
   0% {
-    box-shadow: 0 0 15px #ffd700;
-    background-color: #ffeb3b;
+    box-shadow: 
+      inset 0 0 15px #ffd700,
+      0 0 15px rgba(255, 215, 0, 0.7);
+    background-color: rgba(255, 235, 59, 0.8);
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 25px #ff8c00, 0 0 40px #ff4500;
-    background-color: #fff59d;
+    box-shadow: 
+      inset 0 0 25px #ff8c00,
+      0 0 30px rgba(255, 69, 0, 0.8);
+    background-color: rgba(255, 245, 157, 0.9);
+    transform: scale(1.05);
   }
   100% {
-    box-shadow: 0 0 15px #ffd700, 0 0 30px #ff6347;
-    background-color: #ffeb3b;
+    box-shadow: 
+      inset 0 0 15px #ffd700,
+      0 0 20px rgba(255, 100, 71, 0.7);
+    background-color: rgba(255, 235, 59, 0.8);
+    transform: scale(1);
   }
 }
 
