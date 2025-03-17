@@ -10,6 +10,7 @@ class WinEffects {
     this.fireParticles = [];
     this.isAnimating = false;
     this.lightBeam = null;
+    this.winAmountElement = null;
     
     // Preload coin image
     this.coinImage = new Image();
@@ -94,10 +95,11 @@ class WinEffects {
         speedY: Math.random() * 2 + 5, // Faster initial downward velocity
         gravity: 0.2,
         friction: 0.98,
-        bounceCount: 0,
-        maxBounces: Math.floor(Math.random() * 3) + 1,
         opacity: 0.9, // Higher opacity
-        settled: false,
+        fadeSpeed: Math.random() * 0.01 + 0.005, // Random fade speed
+        fadeDelay: Math.random() * 3000 + 1000, // Random delay before fading
+        fadeStartTime: 0, // Will be set when the coin starts fading
+        isFading: false,
         glint: {
           active: Math.random() > 0.3, // Most coins have glint
           x: Math.random(),
@@ -108,6 +110,66 @@ class WinEffects {
         }
       });
     }
+  }
+  
+  /**
+   * Show winning amount display
+   */
+  showWinningAmount(amount, winningLines) {
+    // Remove any existing winning amount display
+    if (this.winAmountElement) {
+      document.body.removeChild(this.winAmountElement);
+    }
+    
+    // Create winning amount element
+    this.winAmountElement = document.createElement('div');
+    this.winAmountElement.className = 'winning-amount';
+    this.winAmountElement.textContent = `+${amount}`;
+    
+    // Get position of a winning symbol to start the animation from
+    let startPosition = { x: this.canvas.width / 2, y: this.canvas.height / 2 };
+    
+    if (winningLines && winningLines.length > 0) {
+      // Get the first winning line
+      const winLine = winningLines[0];
+      
+      // Get a random position from the winning line (preferably the middle one)
+      let targetPos;
+      if (winLine.positions.length >= 3) {
+        // Use the middle position if available
+        targetPos = winLine.positions[Math.floor(winLine.positions.length / 2)];
+      } else if (winLine.positions.length > 0) {
+        // Otherwise use the first position
+        targetPos = winLine.positions[0];
+      }
+      
+      if (targetPos) {
+        const element = document.querySelector(`#reel${targetPos.col + 1} .symbol:nth-child(${targetPos.row + 1})`);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          startPosition = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2
+          };
+        }
+      }
+    }
+    
+    // Position the element at the winning symbol
+    this.winAmountElement.style.left = `${startPosition.x}px`;
+    this.winAmountElement.style.top = `${startPosition.y}px`;
+    this.winAmountElement.style.transform = 'translate(-50%, -50%)';
+    
+    // Add to document
+    document.body.appendChild(this.winAmountElement);
+    
+    // Remove element after animation completes
+    setTimeout(() => {
+      if (this.winAmountElement && this.winAmountElement.parentNode) {
+        document.body.removeChild(this.winAmountElement);
+        this.winAmountElement = null;
+      }
+    }, 3000);
   }
   
   /**
@@ -236,6 +298,9 @@ class WinEffects {
     // Create coins based on win amount
     this.createCoins(winAmount);
     
+    // Show winning amount
+    this.showWinningAmount(winAmount, winningLines);
+    
     // Play win sound
     playSound('win');
     
@@ -288,11 +353,12 @@ class WinEffects {
     
     // Update and draw coins
     let activeCoins = false;
+    const currentTime = Date.now();
     
     for (let i = 0; i < this.coins.length; i++) {
       const coin = this.coins[i];
       
-      if (!coin.settled) {
+      if (coin.opacity > 0) {
         activeCoins = true;
         
         // Apply gravity
@@ -306,25 +372,17 @@ class WinEffects {
         // Update rotation
         coin.rotation += coin.rotationSpeed;
         
-        // Check for bottom boundary (floor)
-        const floor = this.canvas.height - 20;
-        if (coin.y + coin.size/2 > floor && coin.speedY > 0) {
-          if (coin.bounceCount < coin.maxBounces) {
-            // Bounce with energy loss
-            coin.speedY = -coin.speedY * 0.6;
-            coin.bounceCount++;
-            
-            // Play coin bounce sound (only for some coins to avoid too many sounds)
-            if (Math.random() < 0.1) {
-              playSound('coinBounce');
-            }
-          } else {
-            // Settle coin
-            coin.y = floor - coin.size/2;
-            coin.speedY = 0;
-            coin.speedX = 0;
-            coin.rotationSpeed = 0;
-            coin.settled = true;
+        // Check if coin should start fading
+        if (!coin.isFading && coin.y > this.canvas.height * 0.7) {
+          coin.isFading = true;
+          coin.fadeStartTime = currentTime;
+        }
+        
+        // Apply fading if needed
+        if (coin.isFading) {
+          const fadeElapsed = currentTime - coin.fadeStartTime;
+          if (fadeElapsed > 0) {
+            coin.opacity -= coin.fadeSpeed;
           }
         }
         
@@ -332,15 +390,15 @@ class WinEffects {
         if (coin.x - coin.size/2 < 0 || coin.x + coin.size/2 > this.canvas.width) {
           coin.speedX = -coin.speedX * 0.8;
         }
+        
+        // Update glint effect
+        if (coin.glint.active) {
+          coin.glint.angle += coin.glint.speed;
+        }
+        
+        // Draw the coin
+        this.drawCoin(coin);
       }
-      
-      // Update glint effect
-      if (coin.glint.active) {
-        coin.glint.angle += coin.glint.speed;
-      }
-      
-      // Draw the coin
-      this.drawCoin(coin);
     }
     
     // Continue animation if effects are still active

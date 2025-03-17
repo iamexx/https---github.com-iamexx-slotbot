@@ -147,25 +147,39 @@ body {
   border-top: 3px solid #D4AF37;
 }
 
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
 #balance-display {
   background-color: rgba(0, 0, 0, 0.7);
   padding: 10px 20px;
   border-radius: 20px;
-  margin-bottom: 10px;
   font-size: 18px;
   font-weight: bold;
   border: 1px solid #D4AF37;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  color: #ffd700;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  flex: 1;
+  margin-right: 10px;
+  text-align: center;
 }
 
 #bet-controls {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
   background-color: rgba(0, 0, 0, 0.7);
   padding: 5px 15px;
   border-radius: 20px;
   border: 1px solid #D4AF37;
+  flex: 1;
+  margin-left: 10px;
+  justify-content: center;
 }
 
 #bet-minus, #bet-plus {
@@ -186,14 +200,15 @@ body {
 
 #current-bet {
   margin: 0 15px;
-  font-size: 16px;
+  font-size: 18px;
   color: #ffd700;
   text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  font-weight: bold;
 }
 
 #spin-button {
-  background-color: #FF4500;
-  background-image: linear-gradient(to bottom, #FF6347, #FF4500);
+  background-color: #2E8B57;
+  background-image: linear-gradient(to bottom, #3CB371, #2E8B57);
   color: white;
   border: none;
   padding: 12px 40px;
@@ -204,22 +219,39 @@ body {
   transition: transform 0.2s, background-color 0.2s;
   box-shadow: 
     0 4px 8px rgba(0, 0, 0, 0.3),
-    0 0 15px rgba(255, 69, 0, 0.5);
+    0 0 15px rgba(46, 139, 87, 0.5);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   border: 2px solid #ffd700;
+  animation: spin-button-pulse 1.5s infinite alternate;
+}
+
+@keyframes spin-button-pulse {
+  0% {
+    box-shadow: 
+      0 4px 8px rgba(0, 0, 0, 0.3),
+      0 0 15px rgba(46, 139, 87, 0.5);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 
+      0 6px 12px rgba(0, 0, 0, 0.3),
+      0 0 25px rgba(46, 139, 87, 0.8);
+    transform: scale(1.05);
+  }
 }
 
 #spin-button:hover {
-  background-image: linear-gradient(to bottom, #FF7F50, #FF6347);
+  background-image: linear-gradient(to bottom, #4CAF50, #3CB371);
   transform: scale(1.05);
   box-shadow: 
     0 6px 12px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(255, 69, 0, 0.7);
+    0 0 20px rgba(46, 139, 87, 0.7);
 }
 
 #spin-button:active {
   transform: scale(0.95);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  animation: none;
 }
 
 #spin-button:disabled {
@@ -228,34 +260,50 @@ body {
   transform: none;
   border-color: #888;
   box-shadow: none;
+  animation: none;
 }
 
 #win-display {
-  margin-top: 15px;
-  font-size: 20px;
+  display: none; /* Hide the win display */
+}
+
+/* Winning amount animation */
+.winning-amount {
+  position: absolute;
+  font-size: 48px;
   font-weight: bold;
   color: #ffd700;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-  text-align: center;
-  background-color: rgba(0, 0, 0, 0.7);
-  padding: 8px 20px;
-  border-radius: 20px;
-  border: 1px solid #D4AF37;
+  text-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.9),
+    0 0 20px rgba(255, 69, 0, 0.7),
+    0 2px 4px rgba(0, 0, 0, 0.8);
+  z-index: 1001;
+  opacity: 0;
+  animation: win-amount-animation 3s forwards;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px 20px;
+  border-radius: 15px;
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+  white-space: nowrap;
 }
 
-#win-amount.win-highlight {
-  animation: win-pulse 0.5s infinite alternate;
-  font-size: 24px;
-}
-
-@keyframes win-pulse {
+@keyframes win-amount-animation {
   0% {
-    color: #ffd700;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1);
   }
   100% {
-    color: #ffffff;
-    text-shadow: 0 0 20px rgba(255, 69, 0, 1), 0 0 30px rgba(255, 215, 0, 1);
+    opacity: 0;
+    transform: scale(1.5);
   }
 }
 

@@ -14,7 +14,6 @@ class SlotMachine {
     this.spinButton = document.getElementById('spin-button');
     this.betAmount = document.getElementById('bet-amount');
     this.balance = document.getElementById('balance');
-    this.winAmount = document.getElementById('win-amount');
     this.autoSpinCheckbox = document.getElementById('auto-spin');
     this.isSpinning = false;
     
@@ -63,21 +62,6 @@ class SlotMachine {
   }
   
   /**
-   * Update win amount display
-   */
-  updateWinAmount(amount) {
-    this.winAmount.textContent = amount;
-    
-    // Add animation class if there's a win
-    if (amount > 0) {
-      this.winAmount.classList.add('win-highlight');
-      setTimeout(() => {
-        this.winAmount.classList.remove('win-highlight');
-      }, 2000);
-    }
-  }
-  
-  /**
    * Spin the reels
    */
   spin() {
@@ -90,9 +74,6 @@ class SlotMachine {
     
     // Play spin sound
     playSound('spin');
-    
-    // Clear previous win display
-    this.updateWinAmount(0);
     
     // Get bet amount
     const bet = parseInt(this.betAmount.textContent);
@@ -135,11 +116,10 @@ class SlotMachine {
       // Check for wins
       const winResult = this.checkWins(bet);
       
-      // Update balance and win display
+      // Update balance and show win effects
       if (winResult.totalWinnings > 0) {
         const newBalance = parseInt(this.balance.textContent) + winResult.totalWinnings;
         this.updateBalance(newBalance);
-        this.updateWinAmount(winResult.totalWinnings);
         
         // Play win sound - big win for large amounts
         if (winResult.totalWinnings >= bet * 10) {
