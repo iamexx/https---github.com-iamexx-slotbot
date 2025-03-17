@@ -233,4 +233,86 @@
 
 .wallet-address-display:hover {
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Debug modal specific styles */
+.wallet-debug {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.wallet-debug h3 {
+  color: #D4AF37;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.wallet-debug pre {
+  color: #FFF;
+  font-family: monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.wallet-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.wallet-actions button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 10px;
+  background-color: #D4AF37;
+  background-image: linear-gradient(to bottom, #FFD700, #D4AF37);
+  color: #8B0000;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wallet-actions button:hover {
+  background-image: linear-gradient(to bottom, #FFD700, #FFC125);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.wallet-actions button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Status colors */
+.success {
+  color: #66FF66 !important;
+}
+
+.error {
+  color: #FF6666 !important;
+}
+
+/* Wallet menu button */
+#wallet-debug-button {
+  background-color: #D4AF37;
+  background-image: linear-gradient(to bottom, #FFD700, #D4AF37);
+  color: #8B0000;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+  margin-left: 10px;
 } 

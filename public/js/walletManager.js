@@ -11,10 +11,12 @@ class WalletManager {
     this.balance = 0;
     this.client = null;
     this.solanaWallet = null;
+    this.lastError = null;
+    this.debugInfo = {};
     
     // Network configuration
-    this.network = 'devnet'; // 'devnet' or 'mainnet'
-    this.rpcUrl = 'https://api.devnet.solana.com';
+    this.network = 'testnet'; // 'devnet', 'testnet', or 'mainnet'
+    this.rpcUrl = 'https://api.testnet.solana.com';
     
     // Load required libraries
     this.loadLibraries();
@@ -30,8 +32,19 @@ class WalletManager {
       // For older versions, we need to load the libraries differently
       this.TMAWalletSDK = await import('/@tmawallet/sdk');
       this.SolanaWeb3 = await import('/@solana/web3.js');
-      console.log('Libraries loaded successfully');
+      
+      this.debugInfo.librariesLoaded = {
+        TMAWalletSDK: !!this.TMAWalletSDK,
+        SolanaWeb3: !!this.SolanaWeb3
+      };
+      
+      console.log('Libraries loaded successfully', this.debugInfo.librariesLoaded);
     } catch (error) {
+      this.lastError = {
+        method: 'loadLibraries',
+        message: error.message,
+        stack: error.stack
+      };
       console.error('Failed to load libraries:', error);
     }
   }
@@ -42,25 +55,71 @@ class WalletManager {
   async initialize() {
     try {
       if (!window.Telegram?.WebApp) {
+        this.lastError = {
+          method: 'initialize',
+          message: 'Telegram WebApp is not available'
+        };
         console.error('Telegram WebApp is not available');
         return false;
       }
       
       if (!this.TMAWalletSDK) {
         await this.loadLibraries();
+        if (!this.TMAWalletSDK) {
+          this.lastError = {
+            method: 'initialize',
+            message: 'Failed to load TMA Wallet SDK'
+          };
+          return false;
+        }
       }
       
       // Create client and wallet (using older SDK version)
       this.client = new this.TMAWalletSDK.TMAWalletClient(this.apiKey);
       
+      this.debugInfo.clientCreated = !!this.client;
+      
       // For older SDK version, we need to create the wallet differently
-      this.solanaWallet = this.client.getSolanaWallet();
+      try {
+        this.solanaWallet = this.client.getSolanaWallet();
+        this.debugInfo.solanaWalletCreated = !!this.solanaWallet;
+      } catch (error) {
+        this.lastError = {
+          method: 'initialize:getSolanaWallet',
+          message: error.message,
+          stack: error.stack
+        };
+        console.error('Failed to get Solana wallet:', error);
+        return false;
+      }
       
       // Authenticate user (creates a new wallet if needed)
-      await this.solanaWallet.authenticate();
+      try {
+        await this.solanaWallet.authenticate();
+        this.debugInfo.authenticated = true;
+      } catch (error) {
+        this.lastError = {
+          method: 'initialize:authenticate',
+          message: error.message,
+          stack: error.stack
+        };
+        console.error('Failed to authenticate wallet:', error);
+        return false;
+      }
       
       // Get wallet address
-      this.walletAddress = this.solanaWallet.getAddress();
+      try {
+        this.walletAddress = this.solanaWallet.getAddress();
+        this.debugInfo.walletAddress = this.walletAddress;
+      } catch (error) {
+        this.lastError = {
+          method: 'initialize:getAddress',
+          message: error.message,
+          stack: error.stack
+        };
+        console.error('Failed to get wallet address:', error);
+        return false;
+      }
       
       // Update balance
       await this.updateBalance();
@@ -70,6 +129,11 @@ class WalletManager {
       
       return true;
     } catch (error) {
+      this.lastError = {
+        method: 'initialize',
+        message: error.message,
+        stack: error.stack
+      };
       console.error('Failed to initialize wallet:', error);
       return false;
     }
@@ -99,6 +163,8 @@ class WalletManager {
       // Convert to SOL
       this.balance = balanceInLamports / 1_000_000_000;
       
+      this.debugInfo.balance = this.balance;
+      
       console.log('Wallet balance updated:', this.balance, 'SOL');
       
       // Dispatch event for balance update
@@ -109,6 +175,11 @@ class WalletManager {
       
       return this.balance;
     } catch (error) {
+      this.lastError = {
+        method: 'updateBalance',
+        message: error.message,
+        stack: error.stack
+      };
       console.error('Failed to update balance:', error);
       return 0;
     }
@@ -126,6 +197,21 @@ class WalletManager {
    */
   getBalance() {
     return this.balance;
+  }
+  
+  /**
+   * Get debug information
+   */
+  getDebugInfo() {
+    return {
+      isInitialized: this.isInitialized,
+      walletAddress: this.walletAddress,
+      balance: this.balance,
+      network: this.network,
+      rpcUrl: this.rpcUrl,
+      lastError: this.lastError,
+      debugInfo: this.debugInfo
+    };
   }
   
   /**
@@ -150,6 +236,11 @@ class WalletManager {
       
       return true;
     } catch (error) {
+      this.lastError = {
+        method: 'depositToGame',
+        message: error.message,
+        stack: error.stack
+      };
       console.error('Failed to deposit to game:', error);
       
       // Dispatch failure event
@@ -184,6 +275,11 @@ class WalletManager {
       
       return true;
     } catch (error) {
+      this.lastError = {
+        method: 'withdrawFromGame',
+        message: error.message,
+        stack: error.stack
+      };
       console.error('Failed to withdraw from game:', error);
       
       // Dispatch failure event
@@ -194,6 +290,104 @@ class WalletManager {
       
       return false;
     }
+  }
+  
+  /**
+   * Open debug modal
+   */
+  openDebugModal() {
+    // Create modal for debug info
+    const modal = document.createElement('div');
+    modal.className = 'wallet-modal';
+    
+    // Format debug info as JSON
+    const debugInfo = this.getDebugInfo();
+    const formattedDebugInfo = JSON.stringify(debugInfo, null, 2);
+    
+    modal.innerHTML = `
+      <div class="wallet-modal-content">
+        <span class="wallet-modal-close">&times;</span>
+        <h2>Wallet Debug Information</h2>
+        <div class="wallet-info">
+          <p>Status: <span class="${this.isInitialized ? 'success' : 'error'}">${this.isInitialized ? 'Initialized' : 'Not Initialized'}</span></p>
+          <p>Wallet Address: <span class="wallet-address">${this.walletAddress || 'Not available'}</span></p>
+          <p>Balance: <span class="wallet-balance">${this.balance ? this.balance.toFixed(4) : '0'}</span> SOL</p>
+          <p>Network: <span>${this.network}</span></p>
+        </div>
+        <div class="wallet-debug">
+          <h3>Debug Information</h3>
+          <pre>${formattedDebugInfo}</pre>
+        </div>
+        <div class="wallet-actions">
+          <button id="retry-init-button">Retry Initialization</button>
+          <button id="update-balance-button">Update Balance</button>
+        </div>
+        <div class="wallet-message"></div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listeners
+    const closeBtn = modal.querySelector('.wallet-modal-close');
+    const retryInitBtn = modal.querySelector('#retry-init-button');
+    const updateBalanceBtn = modal.querySelector('#update-balance-button');
+    const messageDiv = modal.querySelector('.wallet-message');
+    
+    closeBtn.addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    
+    retryInitBtn.addEventListener('click', async () => {
+      messageDiv.textContent = 'Retrying initialization...';
+      messageDiv.className = 'wallet-message info';
+      
+      const success = await this.initialize();
+      
+      if (success) {
+        messageDiv.textContent = 'Initialization successful!';
+        messageDiv.className = 'wallet-message success';
+        
+        // Update debug info
+        const debugInfo = this.getDebugInfo();
+        modal.querySelector('pre').textContent = JSON.stringify(debugInfo, null, 2);
+        modal.querySelector('p:nth-child(1) span').textContent = 'Initialized';
+        modal.querySelector('p:nth-child(1) span').className = 'success';
+        modal.querySelector('p:nth-child(2) span').textContent = this.walletAddress || 'Not available';
+        modal.querySelector('p:nth-child(3) span').textContent = this.balance ? this.balance.toFixed(4) : '0';
+      } else {
+        messageDiv.textContent = 'Initialization failed. See console for details.';
+        messageDiv.className = 'wallet-message error';
+        
+        // Update debug info
+        const debugInfo = this.getDebugInfo();
+        modal.querySelector('pre').textContent = JSON.stringify(debugInfo, null, 2);
+      }
+    });
+    
+    updateBalanceBtn.addEventListener('click', async () => {
+      messageDiv.textContent = 'Updating balance...';
+      messageDiv.className = 'wallet-message info';
+      
+      const balance = await this.updateBalance();
+      
+      if (balance > 0 || this.isInitialized) {
+        messageDiv.textContent = `Balance updated: ${balance.toFixed(4)} SOL`;
+        messageDiv.className = 'wallet-message success';
+        
+        // Update debug info
+        const debugInfo = this.getDebugInfo();
+        modal.querySelector('pre').textContent = JSON.stringify(debugInfo, null, 2);
+        modal.querySelector('p:nth-child(3) span').textContent = balance.toFixed(4);
+      } else {
+        messageDiv.textContent = 'Failed to update balance. See console for details.';
+        messageDiv.className = 'wallet-message error';
+        
+        // Update debug info
+        const debugInfo = this.getDebugInfo();
+        modal.querySelector('pre').textContent = JSON.stringify(debugInfo, null, 2);
+      }
+    });
   }
   
   /**
