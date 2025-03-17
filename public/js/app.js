@@ -98,82 +98,30 @@ function addSoundControl() {
 
 // Add wallet controls
 function addWalletControls() {
-  // Create wallet buttons container
-  const walletButtons = document.createElement('div');
-  walletButtons.className = 'wallet-buttons';
+  // Create wallet button
+  const walletButton = document.createElement('button');
+  walletButton.className = 'wallet-button';
+  walletButton.innerHTML = '💵';
+  walletButton.title = 'Wallet';
+  walletButton.style.fontSize = '18px';
+  walletButton.style.padding = '8px 12px';
+  walletButton.style.borderRadius = '4px';
+  walletButton.style.cursor = 'pointer';
   
-  // Create deposit button
-  const depositButton = document.createElement('button');
-  depositButton.className = 'wallet-button';
-  depositButton.textContent = 'Deposit';
-  depositButton.addEventListener('click', () => {
+  // Add click handler
+  walletButton.addEventListener('click', () => {
     playSound('button');
     if (walletManager && walletManager.isInitialized) {
-      walletManager.openDepositDialog();
+      walletManager.showWalletModal();
     } else {
       alert('Wallet not initialized. Please try again later.');
     }
   });
-  
-  // Create withdraw button
-  const withdrawButton = document.createElement('button');
-  withdrawButton.className = 'wallet-button';
-  withdrawButton.textContent = 'Withdraw';
-  withdrawButton.addEventListener('click', () => {
-    playSound('button');
-    if (walletManager && walletManager.isInitialized) {
-      walletManager.openWithdrawDialog();
-    } else {
-      alert('Wallet not initialized. Please try again later.');
-    }
-  });
-  
-  // Add buttons to container
-  walletButtons.appendChild(depositButton);
-  walletButtons.appendChild(withdrawButton);
-  
-  // Add wallet address display
-  const walletAddressDisplay = document.createElement('div');
-  walletAddressDisplay.className = 'wallet-address-display';
-  
-  // Update wallet address when available
-  const updateWalletAddress = () => {
-    if (walletManager && walletManager.walletAddress) {
-      const address = walletManager.walletAddress;
-      // Truncate address for display
-      const truncatedAddress = address.substring(0, 4) + '...' + address.substring(address.length - 4);
-      walletAddressDisplay.textContent = truncatedAddress;
-      walletAddressDisplay.title = address;
-      
-      // Add click handler to copy address
-      walletAddressDisplay.addEventListener('click', () => {
-        navigator.clipboard.writeText(address).then(() => {
-          // Show copied notification
-          const originalText = walletAddressDisplay.textContent;
-          walletAddressDisplay.textContent = 'Copied!';
-          setTimeout(() => {
-            walletAddressDisplay.textContent = originalText;
-          }, 1000);
-        });
-      });
-    } else {
-      walletAddressDisplay.textContent = 'Wallet loading...';
-    }
-  };
-  
-  // Listen for wallet initialization
-  document.addEventListener('wallet-balance-updated', () => {
-    updateWalletAddress();
-  });
-  
-  // Initial update
-  setTimeout(updateWalletAddress, 1000);
   
   // Add to UI
   const uiContainer = document.getElementById('ui-container');
   if (uiContainer) {
-    uiContainer.appendChild(walletAddressDisplay);
-    uiContainer.appendChild(walletButtons);
+    uiContainer.appendChild(walletButton);
   }
 }
 

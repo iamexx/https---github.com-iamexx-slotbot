@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Wallet modal functionality
   const walletModal = document.getElementById('wallet-modal');
-  const walletBtn = document.getElementById('wallet-button');
   const walletCloseBtn = document.querySelector('.wallet-close-button');
   
   // Wallet action buttons
@@ -34,32 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
           });
       }
     });
-  }
-  
-  // Open wallet modal when wallet button is clicked
-  walletBtn.onclick = function() {
-    // If wallet manager is initialized, show the wallet modal
-    if (window.walletManager && window.walletManager.isInitialized) {
-      window.walletManager.showWalletModal();
-    } else {
-      // Otherwise, just show the modal
-      walletModal.style.display = "block";
-      
-      // Try to initialize wallet manager if it exists
-      if (window.walletManager) {
-        window.walletManager.initialize().then(success => {
-          if (success) {
-            console.log('Wallet manager initialized successfully');
-          } else {
-            console.error('Failed to initialize wallet manager');
-          }
-        });
-      }
-    }
-    
-    if (typeof playSound === 'function') {
-      playSound('button');
-    }
   }
   
   // Close wallet modal when close button is clicked

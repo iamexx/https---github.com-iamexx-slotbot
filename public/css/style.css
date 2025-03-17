@@ -157,6 +157,8 @@ body {
   flex-direction: column;
   align-items: center;
   border-top: 3px solid #D4AF37;
+  position: relative;
+  padding-bottom: 15px;
 }
 
 .info-row {
@@ -218,61 +220,119 @@ body {
   font-weight: bold;
 }
 
-#spin-button {
-  background-color: #2E8B57;
-  background-image: linear-gradient(to bottom, #3CB371, #2E8B57);
-  color: white;
-  border: none;
-  padding: 12px 40px;
-  border-radius: 25px;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.2s, background-color 0.2s;
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    0 0 15px rgba(46, 139, 87, 0.5);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  border: 2px solid #ffd700;
-  animation: spin-button-pulse 1.5s infinite alternate;
+/* Animations for SPIN button */
+@keyframes glow {
+  0% { box-shadow: 0 0 5px #ff9900; }
+  50% { box-shadow: 0 0 20px #ff9900, 0 0 30px #ff6600; }
+  100% { box-shadow: 0 0 5px #ff9900; }
 }
 
-@keyframes spin-button-pulse {
-  0% {
-    box-shadow: 
-      0 4px 8px rgba(0, 0, 0, 0.3),
-      0 0 15px rgba(46, 139, 87, 0.5);
-    transform: scale(1);
-  }
-  100% {
-    box-shadow: 
-      0 6px 12px rgba(0, 0, 0, 0.3),
-      0 0 25px rgba(46, 139, 87, 0.8);
-    transform: scale(1.05);
-  }
+@keyframes vibrate {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(0); }
+  75% { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+/* Unified button styles */
+.controls button, #spin-button, #bet-minus, #bet-plus {
+  background: linear-gradient(to bottom, #4a4a4a, #2a2a2a);
+  color: white;
+  border: 2px solid #555;
+  border-radius: 5px;
+  padding: 8px 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.controls button:hover, #bet-minus:hover, #bet-plus:hover {
+  background: linear-gradient(to bottom, #5a5a5a, #3a3a3a);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.controls button:active, #bet-minus:active, #bet-plus:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* SPIN button specific styles */
+#spin-button {
+  background: linear-gradient(to bottom, #ff9900, #ff6600);
+  font-size: 1.2em;
+  padding: 12px 25px;
+  border: 2px solid #ff6600;
+  animation: glow 2s infinite;
 }
 
 #spin-button:hover {
-  background-image: linear-gradient(to bottom, #4CAF50, #3CB371);
-  transform: scale(1.05);
-  box-shadow: 
-    0 6px 12px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(46, 139, 87, 0.7);
+  background: linear-gradient(to bottom, #ffaa00, #ff7700);
+  animation: glow 2s infinite, vibrate 0.3s infinite;
 }
 
 #spin-button:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  animation: none;
+  background: linear-gradient(to bottom, #ff8800, #ff5500);
+  transform: translateY(1px);
+  animation: glow 2s infinite;
 }
 
-#spin-button:disabled {
-  background-image: linear-gradient(to bottom, #666, #444);
-  cursor: not-allowed;
-  transform: none;
-  border-color: #888;
-  box-shadow: none;
-  animation: none;
+/* Auto spin container */
+.spin-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.auto-spin-container {
+  display: flex;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+.auto-spin-container input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-left: 5px;
+}
+
+/* Unified button styling */
+.control-button, #paytable-button, .wallet-button {
+  background: linear-gradient(to bottom, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin: 0 5px;
+}
+
+.control-button:hover, #paytable-button:hover, .wallet-button:hover {
+  background: linear-gradient(to bottom, #3aa2e5, #3498db);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.control-button:active, #paytable-button:active, .wallet-button:active {
+  background: linear-gradient(to bottom, #2980b9, #2471a3);
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Bottom controls layout */
+.bottom-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  position: relative;
 }
 
 #win-display {
@@ -316,69 +376,6 @@ body {
   100% {
     opacity: 0;
     transform: scale(1.5);
-  }
-}
-
-.auto-spin-container {
-  margin-top: 15px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #ffd700;
-}
-
-.auto-spin-container input {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-}
-
-/* Spinning animation */
-@keyframes spin {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-300%);
-  }
-}
-
-.reel.spinning .symbol {
-  animation: spin 0.5s linear infinite;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .slot-header h1 {
-    font-size: 20px;
-  }
-  
-  .symbol {
-    font-size: 28px;
-  }
-  
-  #spin-button {
-    padding: 10px 30px;
-    font-size: 18px;
-  }
-}
-
-@media (max-width: 480px) {
-  .slot-header h1 {
-    font-size: 18px;
-  }
-  
-  .symbol {
-    font-size: 24px;
-  }
-  
-  #balance-display, #bet-controls, #win-display {
-    font-size: 14px;
-  }
-  
-  #spin-button {
-    padding: 8px 25px;
-    font-size: 16px;
   }
 }
 
@@ -498,111 +495,6 @@ body {
   color: #FFF;
   margin-bottom: 10px;
   line-height: 1.5;
-}
-
-/* Bottom controls */
-.bottom-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-top: 15px;
-}
-
-#paytable-button {
-  background-color: #D4AF37;
-  color: #8B0000;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s;
-}
-
-#paytable-button:hover {
-  background-color: #FFD700;
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-}
-
-/* Sound button */
-#sound-toggle {
-  background-color: #D4AF37;
-  color: #8B0000;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  font-size: 20px;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-left: 10px;
-}
-
-#sound-toggle:hover {
-  background-color: #FFD700;
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-}
-
-#sound-toggle.sound-off {
-  background-color: #888;
-  color: #333;
-}
-
-/* Responsive adjustments for paytable */
-@media (max-width: 768px) {
-  .modal-content {
-    width: 90%;
-    margin: 5% auto;
-    padding: 15px;
-  }
-  
-  .symbol-cell {
-    font-size: 28px;
-    width: 50px;
-  }
-  
-  .payout-cell {
-    font-size: 14px;
-    padding: 3px;
-  }
-}
-
-@media (max-width: 480px) {
-  .modal-content {
-    width: 95%;
-    padding: 10px;
-  }
-  
-  .symbol-cell {
-    font-size: 24px;
-    width: 40px;
-    margin-right: 10px;
-  }
-  
-  .payout-cell {
-    font-size: 12px;
-    padding: 2px;
-  }
-  
-  .paytable-row {
-    padding: 5px;
-  }
-  
-  .paylines-info {
-    padding: 10px;
-  }
-  
-  .paylines-info p {
-    font-size: 12px;
-  }
 }
 
 /* Wallet Button and Modal Styles */
@@ -767,4 +659,53 @@ body {
   position: absolute;
   right: -25px;
   top: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .slot-header h1 {
+    font-size: 20px;
+  }
+  
+  .symbol {
+    font-size: 28px;
+  }
+  
+  #spin-button {
+    padding: 10px 30px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .slot-header h1 {
+    font-size: 18px;
+  }
+  
+  .symbol {
+    font-size: 24px;
+  }
+  
+  #balance-display, #bet-controls, #win-display {
+    font-size: 14px;
+  }
+  
+  #spin-button {
+    padding: 8px 25px;
+    font-size: 16px;
+  }
+}
+
+/* Spinning animation */
+@keyframes spin {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-300%);
+  }
+}
+
+.reel.spinning .symbol {
+  animation: spin 0.5s linear infinite;
 } 
