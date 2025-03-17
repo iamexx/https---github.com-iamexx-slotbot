@@ -1,90 +1,57 @@
-# Sizzling Hot Slots - Telegram Mini App
+# Sizzling Hot™ deluxe Slot Machine
 
-A 3D slot machine game built with HTML5 and Three.js for Telegram Mini Apps, ready to be hosted on Glitch.com.
+A web-based implementation of the classic Sizzling Hot™ deluxe slot machine game, designed to work as a Telegram Mini App.
 
 ## Features
 
-- 3D slot machine with animated spinning reels
-- Realistic fruit symbols rendered with Three.js
-- 5 reels, 3 rows, and 5 paylines
-- Adjustable bet amounts
-- Win calculations and payline visualization
-- Responsive design that works on mobile and desktop
-- Telegram Mini App integration
+- **Authentic Gameplay**: Follows the original Sizzling Hot™ deluxe rules with 5 fixed paylines
+- **Realistic Effects**: Gold coin shower for wins, fire trails for winning lines, and scatter win effects
+- **Sound Effects**: Immersive audio for spinning, reel stops, wins, and button clicks
+- **Responsive Design**: Works on both desktop and mobile devices
+- **Telegram Integration**: Functions as a Telegram Mini App with theme support
 
-## Symbols
+## Game Rules
 
-The game includes the following symbols:
-- Cherry
-- Grapes
-- Watermelon
-- Orange
-- Lemon
-- Plum
-- 7 (highest paying)
-- Star (scatter)
+- 5 fixed paylines
+- Winning combinations start from the leftmost reel
+- Scatter symbols (⭐) pay in any position
+- Cherry symbols pay for 2 of a kind
 
-## Payouts
+## Symbol Payouts
 
-Payouts are calculated based on the bet amount and the symbol combinations:
-- 3x Cherries: 2x bet
-- 3x Grapes: 3x bet
-- 3x Watermelon: 4x bet
-- 3x Orange: 3x bet
-- 3x Lemon: 2x bet
-- 3x Plum: 2x bet
-- 3x 7: 10x bet
-- 3x Star (anywhere): 5x bet
+| Symbol | 5x | 4x | 3x | 2x |
+|--------|-----|-----|-----|-----|
+| 7️⃣ | 5000 | 1000 | 100 | - |
+| 🍉 | 500 | 200 | 50 | - |
+| 🍇 | 500 | 200 | 50 | - |
+| 🍑 | 200 | 50 | 20 | - |
+| 🍊 | 200 | 50 | 20 | - |
+| 🍋 | 200 | 50 | 20 | - |
+| 🍒 | 200 | 50 | 20 | 5 |
+| ⭐ | 50 | 10 | 2 | - |
 
-Higher combinations (4 or 5 matching symbols) pay even more.
+## Technical Details
 
-## Technologies Used
-
-- HTML5 and CSS3
-- JavaScript (ES6+)
-- Three.js for 3D rendering
-- GSAP for animations
-- Express.js for the server
-- Telegram Mini App SDK
+- Built with vanilla JavaScript, HTML5, and CSS3
+- Uses HTML5 Canvas for win effects and animations
+- Implements a custom sound manager for audio effects
+- Designed for integration with the Telegram Mini App platform
 
 ## Setup and Installation
 
 1. Clone the repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Create a `.env` file with your settings:
-   ```
-   PORT=3000
-   NODE_ENV=development
-   ```
-4. Start the development server:
-   ```
-   npm run dev
-   ```
-5. Open your browser at `http://localhost:3000`
+2. Install dependencies with `npm install`
+3. Configure environment variables (see `.env.example`)
+4. Start the server with `node server.js`
 
-## Deployment to Glitch.com
+## Deployment on Glitch
 
-1. Create a new project on Glitch.com
-2. Import this repository
-3. The app will automatically deploy and run
+This application is optimized for deployment on Glitch:
 
-## Telegram Mini App Integration
-
-To set up this game as a Telegram Mini App:
-
-1. Talk to @BotFather on Telegram
-2. Create a new bot or select an existing one
-3. Use the /newapp command to create a Mini App
-4. Set the URL to your Glitch.com project URL
-5. Configure the bot to open the Mini App
+1. Import the repository to Glitch
+2. Set up the required environment variables
+3. The application will automatically start
 
 ## License
 
-ISC
-
-## Author
-
-Created by [Your Name] 
+This is a fan-made implementation for educational purposes only. Sizzling Hot™ is a trademark of Novomatic AG. This project is not affiliated with or endorsed by Novomatic. 

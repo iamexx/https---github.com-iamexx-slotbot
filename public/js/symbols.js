@@ -2,65 +2,61 @@
  * Symbol definitions
  */
 const SYMBOLS = {
-  CHERRY: 'CHERRY',
+  SEVEN: 'SEVEN',
+  MELON: 'MELON',
   GRAPES: 'GRAPES',
-  WATERMELON: 'WATERMELON',
+  PLUM: 'PLUM',
   ORANGE: 'ORANGE',
   LEMON: 'LEMON',
-  PEACH: 'PEACH',
-  SEVEN: 'SEVEN',
-  STAR: 'STAR',
-  WILD: 'WILD'
+  CHERRY: 'CHERRY',
+  STAR: 'STAR'
 };
 
 /**
  * Symbol configuration
  */
 const SYMBOLS_CONFIG = {
-  [SYMBOLS.CHERRY]: {
-    emoji: '🍒',
-    weight: 20,
-    payouts: [2, 5, 10] // 3, 4, 5 of a kind
+  [SYMBOLS.SEVEN]: {
+    emoji: '7️⃣',
+    weight: 5,
+    payouts: [100, 1000, 5000] // 3, 4, 5 of a kind
+  },
+  [SYMBOLS.MELON]: {
+    emoji: '🍉',
+    weight: 10,
+    payouts: [50, 200, 500]
   },
   [SYMBOLS.GRAPES]: {
     emoji: '🍇',
-    weight: 15,
-    payouts: [3, 8, 15]
-  },
-  [SYMBOLS.WATERMELON]: {
-    emoji: '🍉',
     weight: 10,
-    payouts: [5, 10, 20]
+    payouts: [50, 200, 500]
+  },
+  [SYMBOLS.PLUM]: {
+    emoji: '🍑', // Using peach as plum
+    weight: 15,
+    payouts: [20, 50, 200]
   },
   [SYMBOLS.ORANGE]: {
     emoji: '🍊',
     weight: 15,
-    payouts: [3, 8, 15]
+    payouts: [20, 50, 200]
   },
   [SYMBOLS.LEMON]: {
     emoji: '🍋',
-    weight: 20,
-    payouts: [2, 5, 10]
+    weight: 15,
+    payouts: [20, 50, 200]
   },
-  [SYMBOLS.PEACH]: {
-    emoji: '🍑',
+  [SYMBOLS.CHERRY]: {
+    emoji: '🍒',
     weight: 20,
-    payouts: [2, 5, 10]
-  },
-  [SYMBOLS.SEVEN]: {
-    emoji: '7️⃣',
-    weight: 5,
-    payouts: [10, 25, 50]
+    payouts: [5, 50, 200],
+    paysTwoOfAKind: true
   },
   [SYMBOLS.STAR]: {
     emoji: '⭐',
     weight: 10,
-    payouts: [5, 15, 30]
-  },
-  [SYMBOLS.WILD]: {
-    emoji: '🃏',
-    weight: 5,
-    payouts: [10, 25, 100]
+    payouts: [2, 10, 50],
+    isScatter: true
   }
 };
 

@@ -20,6 +20,7 @@ const CONFIG = {
   },
   
   // Paylines (row indices for each column)
+  // Sizzling Hot has 5 fixed paylines
   paylines: [
     [1, 1, 1, 1, 1], // Middle row
     [0, 0, 0, 0, 0], // Top row
@@ -33,5 +34,8 @@ const CONFIG = {
     duration: 3000,
     particleCount: 100,
     particleColors: ['#FFD700', '#FF6347', '#7FFF00', '#FF00FF', '#00FFFF']
-  }
+  },
+  
+  // Game name
+  gameName: "Sizzling Hot™ deluxe"
 }; 

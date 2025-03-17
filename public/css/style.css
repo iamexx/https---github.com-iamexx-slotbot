@@ -20,7 +20,7 @@ body {
   align-items: center;
 }
 
-#game-container {
+.game-container {
   position: relative;
   width: 100%;
   max-width: 500px;
@@ -35,8 +35,8 @@ body {
 #slot-machine {
   width: 100%;
   height: 100%;
-  background-color: #8B4513;
-  background-image: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+  background-color: #8B0000;
+  background-image: linear-gradient(135deg, #8B0000 0%, #B22222 50%, #8B0000 100%);
   border-radius: 10px;
   border: 8px solid #D4AF37;
   box-shadow: 
@@ -60,7 +60,7 @@ body {
 
 .slot-header h1 {
   margin: 0;
-  color: #8B4513;
+  color: #8B0000;
   font-size: 24px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   font-weight: bold;
@@ -108,14 +108,22 @@ body {
   background-color: #ffeb3b;
   box-shadow: 0 0 15px #ffd700;
   animation: pulse 1s infinite alternate;
+  position: relative;
+  z-index: 5;
 }
 
 @keyframes pulse {
   0% {
     box-shadow: 0 0 15px #ffd700;
+    background-color: #ffeb3b;
+  }
+  50% {
+    box-shadow: 0 0 25px #ff8c00, 0 0 40px #ff4500;
+    background-color: #fff59d;
   }
   100% {
-    box-shadow: 0 0 25px #ffd700, 0 0 40px #ffd700;
+    box-shadow: 0 0 15px #ffd700, 0 0 30px #ff6347;
+    background-color: #ffeb3b;
   }
 }
 
@@ -130,8 +138,8 @@ body {
 }
 
 #ui-container {
-  background-color: #333;
-  background-image: linear-gradient(to bottom, #444, #222);
+  background-color: #8B0000;
+  background-image: linear-gradient(to bottom, #B22222, #8B0000);
   padding: 15px;
   display: flex;
   flex-direction: column;
@@ -161,8 +169,8 @@ body {
 }
 
 #bet-minus, #bet-plus {
-  background-color: #e94560;
-  background-image: linear-gradient(to bottom, #e94560, #c13050);
+  background-color: #FF4500;
+  background-image: linear-gradient(to bottom, #FF6347, #FF4500);
   color: white;
   border: none;
   width: 30px;
@@ -184,8 +192,8 @@ body {
 }
 
 #spin-button {
-  background-color: #e94560;
-  background-image: linear-gradient(to bottom, #e94560, #c13050);
+  background-color: #FF4500;
+  background-image: linear-gradient(to bottom, #FF6347, #FF4500);
   color: white;
   border: none;
   padding: 12px 40px;
@@ -196,17 +204,17 @@ body {
   transition: transform 0.2s, background-color 0.2s;
   box-shadow: 
     0 4px 8px rgba(0, 0, 0, 0.3),
-    0 0 15px rgba(233, 69, 96, 0.5);
+    0 0 15px rgba(255, 69, 0, 0.5);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   border: 2px solid #ffd700;
 }
 
 #spin-button:hover {
-  background-image: linear-gradient(to bottom, #ff6b81, #e94560);
+  background-image: linear-gradient(to bottom, #FF7F50, #FF6347);
   transform: scale(1.05);
   box-shadow: 
     0 6px 12px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(233, 69, 96, 0.7);
+    0 0 20px rgba(255, 69, 0, 0.7);
 }
 
 #spin-button:active {
@@ -247,7 +255,7 @@ body {
   }
   100% {
     color: #ffffff;
-    text-shadow: 0 0 20px rgba(255, 215, 0, 1);
+    text-shadow: 0 0 20px rgba(255, 69, 0, 1), 0 0 30px rgba(255, 215, 0, 1);
   }
 }
 
@@ -281,17 +289,12 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .slot-header h1 {
+    font-size: 20px;
+  }
+  
   .symbol {
     font-size: 28px;
-  }
-  
-  #ui-container {
-    padding: 10px;
-  }
-  
-  #balance-display {
-    font-size: 16px;
-    padding: 8px 16px;
   }
   
   #spin-button {
@@ -301,30 +304,243 @@ body {
 }
 
 @media (max-width: 480px) {
+  .slot-header h1 {
+    font-size: 18px;
+  }
+  
   .symbol {
     font-size: 24px;
   }
   
-  #ui-container {
-    padding: 8px;
-  }
-  
-  #balance-display {
-    font-size: 14px;
-    padding: 6px 12px;
-  }
-  
-  #bet-controls {
-    padding: 3px 10px;
-  }
-  
-  #current-bet {
-    margin: 0 10px;
+  #balance-display, #bet-controls, #win-display {
     font-size: 14px;
   }
   
   #spin-button {
     padding: 8px 25px;
     font-size: 16px;
+  }
+}
+
+/* Add styles for the paytable modal and paylines */
+
+/* Paylines */
+.paylines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.payline {
+  position: absolute;
+  height: 2px;
+  background-color: transparent;
+  z-index: 5;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+  background-color: #8B0000;
+  background-image: linear-gradient(135deg, #8B0000 0%, #B22222 50%, #8B0000 100%);
+  margin: 10% auto;
+  padding: 20px;
+  border: 5px solid #D4AF37;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.close-button {
+  color: #D4AF37;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  color: #FFF;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+}
+
+.modal-content h2 {
+  color: #D4AF37;
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.paytable-grid {
+  display: grid;
+  grid-gap: 10px;
+  margin-bottom: 20px;
+}
+
+.paytable-row {
+  display: flex;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  padding: 10px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.symbol-cell {
+  font-size: 32px;
+  width: 60px;
+  text-align: center;
+  margin-right: 15px;
+}
+
+.payout-cell {
+  flex: 1;
+  text-align: center;
+  color: #FFF;
+  font-weight: bold;
+  padding: 5px;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.2);
+  margin: 0 5px;
+}
+
+.paylines-info {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.paylines-info h3 {
+  color: #D4AF37;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.paylines-info p {
+  color: #FFF;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+/* Bottom controls */
+.bottom-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 15px;
+}
+
+#paytable-button {
+  background-color: #D4AF37;
+  color: #8B0000;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+}
+
+#paytable-button:hover {
+  background-color: #FFD700;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+}
+
+/* Sound button */
+#sound-toggle {
+  background-color: #D4AF37;
+  color: #8B0000;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 10px;
+}
+
+#sound-toggle:hover {
+  background-color: #FFD700;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+}
+
+#sound-toggle.sound-off {
+  background-color: #888;
+  color: #333;
+}
+
+/* Responsive adjustments for paytable */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 90%;
+    margin: 5% auto;
+    padding: 15px;
+  }
+  
+  .symbol-cell {
+    font-size: 28px;
+    width: 50px;
+  }
+  
+  .payout-cell {
+    font-size: 14px;
+    padding: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    width: 95%;
+    padding: 10px;
+  }
+  
+  .symbol-cell {
+    font-size: 24px;
+    width: 40px;
+    margin-right: 10px;
+  }
+  
+  .payout-cell {
+    font-size: 12px;
+    padding: 2px;
+  }
+  
+  .paytable-row {
+    padding: 5px;
+  }
+  
+  .paylines-info {
+    padding: 10px;
+  }
+  
+  .paylines-info p {
+    font-size: 12px;
   }
 } 

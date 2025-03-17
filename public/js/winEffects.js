@@ -15,6 +15,9 @@ class WinEffects {
     this.coinImage = new Image();
     this.coinImage.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiNmZmQzMDAiIHN0cm9rZT0iI2RhYTUyMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMjUiIGZpbGw9IiNmZmQzMDAiIHN0cm9rZT0iI2RhYTUyMCIgc3Ryb2tlLXdpZHRoPSIxIi8+PGVsbGlwc2UgY3g9IjIzIiBjeT0iMjAiIHJ4PSI4IiByeT0iNiIgZmlsbD0iI2ZmZjVhMCIgb3BhY2l0eT0iMC43Ii8+PC9zdmc+';
     
+    // Make sure canvas is visible
+    this.canvas.style.display = 'block';
+    
     // Resize canvas to match window size
     this.resizeCanvas();
     window.addEventListener('resize', () => this.resizeCanvas());
@@ -27,19 +30,19 @@ class WinEffects {
    * Resize canvas to match window size
    */
   resizeCanvas() {
-    const gameContainer = document.querySelector('.game-container');
-    if (gameContainer) {
-      // Make canvas cover the entire viewport
-      this.canvas.width = window.innerWidth;
-      this.canvas.height = window.innerHeight;
-      
-      // Ensure canvas is positioned correctly
-      this.canvas.style.position = 'fixed';
-      this.canvas.style.top = '0';
-      this.canvas.style.left = '0';
-      this.canvas.style.zIndex = '1000'; // Make sure it's above other elements
-      this.canvas.style.pointerEvents = 'none'; // Allow clicks to pass through
-    }
+    // Make canvas cover the entire viewport
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    
+    // Ensure canvas is positioned correctly
+    this.canvas.style.position = 'fixed';
+    this.canvas.style.top = '0';
+    this.canvas.style.left = '0';
+    this.canvas.style.zIndex = '1000'; // Make sure it's above other elements
+    this.canvas.style.pointerEvents = 'none'; // Allow clicks to pass through
+    this.canvas.style.display = 'block'; // Ensure it's visible
+    
+    console.log('Canvas resized to:', this.canvas.width, 'x', this.canvas.height);
   }
   
   /**
@@ -110,13 +113,16 @@ class WinEffects {
   /**
    * Create fire trail between winning symbols
    */
-  createFireTrail(positions) {
+  createFireTrail(positions, isScatter = false) {
     // Get positions of symbols on this payline
     const points = [];
     
     positions.forEach(pos => {
       const element = document.querySelector(`#reel${pos.col + 1} .symbol:nth-child(${pos.row + 1})`);
-      if (!element) return;
+      if (!element) {
+        console.warn(`Could not find element for position: reel${pos.col + 1}, symbol ${pos.row + 1}`);
+        return;
+      }
       
       const rect = element.getBoundingClientRect();
       points.push({
@@ -125,128 +131,143 @@ class WinEffects {
       });
     });
     
-    if (points.length < 2) return;
+    if (points.length < 2 && !isScatter) {
+      console.warn('Not enough points to create fire trail');
+      return;
+    }
     
-    console.log(`Creating fire trail between ${points.length} points`);
-    
-    // Create fire particles along the path between points
-    for (let i = 0; i < points.length - 1; i++) {
-      const start = points[i];
-      const end = points[i + 1];
+    if (isScatter) {
+      // For scatter wins, create fire bursts at each scatter symbol
+      points.forEach(point => {
+        this.createFireBurst(point.x, point.y);
+      });
+    } else {
+      console.log(`Creating fire trail between ${points.length} points`);
       
-      // Calculate distance between points
-      const dx = end.x - start.x;
-      const dy = end.y - start.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      
-      // Create particles along the line
-      const particlesPerLine = Math.ceil(distance / 3); // One particle every 3px
-      
-      for (let j = 0; j < particlesPerLine; j++) {
-        const ratio = j / particlesPerLine;
-        const x = start.x + dx * ratio;
-        const y = start.y + dy * ratio;
+      // Create fire particles along the path between points
+      for (let i = 0; i < points.length - 1; i++) {
+        const start = points[i];
+        const end = points[i + 1];
         
-        // Add some randomness to position
-        const offsetX = (Math.random() - 0.5) * 15;
-        const offsetY = (Math.random() - 0.5) * 15;
+        // Calculate distance between points
+        const dx = end.x - start.x;
+        const dy = end.y - start.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
         
-        this.fireParticles.push({
-          x: x + offsetX,
-          y: y + offsetY,
-          size: Math.random() * 12 + 8, // Larger fire particles
-          speedX: (Math.random() - 0.5) * 3,
-          speedY: (Math.random() - 0.5) * 3 - 1, // Slight upward bias
-          life: 1.0,
-          decay: Math.random() * 0.01 + 0.005, // Slower decay
-          color: this.getFireColor(Math.random())
-        });
+        // Create particles along the line
+        const particlesPerLine = Math.ceil(distance / 3); // One particle every 3px
+        
+        for (let j = 0; j < particlesPerLine; j++) {
+          const ratio = j / particlesPerLine;
+          const x = start.x + dx * ratio;
+          const y = start.y + dy * ratio;
+          
+          // Add some randomness to position
+          const offsetX = (Math.random() - 0.5) * 15;
+          const offsetY = (Math.random() - 0.5) * 15;
+          
+          this.fireParticles.push({
+            x: x + offsetX,
+            y: y + offsetY,
+            size: Math.random() * 12 + 8, // Larger fire particles
+            speedX: (Math.random() - 0.5) * 3,
+            speedY: (Math.random() - 0.5) * 3 - 1, // Slight upward bias
+            life: 1.0,
+            decay: Math.random() * 0.01 + 0.005, // Slower decay
+            color: this.getFireColor(Math.random())
+          });
+        }
       }
     }
   }
   
   /**
-   * Get fire color based on temperature (0-1)
+   * Create a burst of fire particles at a specific point
    */
-  getFireColor(temp) {
-    if (temp < 0.2) {
-      return '#FF3300'; // Orange-red
-    } else if (temp < 0.4) {
-      return '#FF6600'; // Orange
-    } else if (temp < 0.6) {
-      return '#FFAA00'; // Yellow-orange
-    } else if (temp < 0.8) {
-      return '#FFDD00'; // Yellow
-    } else {
-      return '#FFFFFF'; // White-hot center
+  createFireBurst(x, y) {
+    const particleCount = 30;
+    
+    for (let i = 0; i < particleCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 3 + 1;
+      
+      this.fireParticles.push({
+        x: x,
+        y: y,
+        size: Math.random() * 15 + 10, // Larger fire particles for scatter
+        speedX: Math.cos(angle) * speed,
+        speedY: Math.sin(angle) * speed - 1, // Slight upward bias
+        life: 1.0,
+        decay: Math.random() * 0.01 + 0.005,
+        color: this.getFireColor(Math.random())
+      });
     }
   }
   
   /**
-   * Show win effect for winning lines
+   * Get fire color based on random value
+   */
+  getFireColor(value) {
+    if (value < 0.2) {
+      return '#FF5500'; // Orange-red
+    } else if (value < 0.4) {
+      return '#FF8800'; // Orange
+    } else if (value < 0.6) {
+      return '#FFAA00'; // Yellow-orange
+    } else if (value < 0.8) {
+      return '#FFCC00'; // Yellow
+    } else {
+      return '#FFFFFF'; // White (hottest)
+    }
+  }
+  
+  /**
+   * Show win effect with coins
    */
   showWinEffect(winningLines, winAmount) {
-    if (this.isAnimating) return;
+    console.log('Showing win effect for amount:', winAmount);
     
-    if (winningLines.length === 0) {
-      console.log('No winning lines to show effect for');
-      return;
-    }
-    
-    console.log(`Showing win effect for ${winningLines.length} lines, win amount: ${winAmount}`);
-    
-    this.isAnimating = true;
-    this.fireParticles = []; // Clear any existing fire particles
-    
-    // Make canvas visible
+    // Make sure canvas is visible
     this.canvas.style.display = 'block';
-    
-    // Highlight winning symbols
-    winningLines.forEach(line => {
-      line.positions.forEach(pos => {
-        const element = document.querySelector(`#reel${pos.col + 1} .symbol:nth-child(${pos.row + 1})`);
-        if (element) {
-          element.classList.add('highlight');
-        }
-      });
-    });
-    
-    // Create fire trails for all winning lines
-    winningLines.forEach(line => {
-      this.createFireTrail(line.positions);
-    });
-    
-    // Create coins for the explosion
-    this.createCoins(winAmount);
-    
-    // Start animation
-    this.animate();
-    
-    // Set timeout to remove highlights
-    setTimeout(() => {
-      document.querySelectorAll('.symbol.highlight').forEach(el => {
-        el.classList.remove('highlight');
-      });
-    }, CONFIG.winEffects.duration);
-  }
-  
-  /**
-   * Animate coins and effects
-   */
-  animate() {
-    if (!this.isAnimating) return;
     
     // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
+    // Create coins based on win amount
+    this.createCoins(winAmount);
+    
+    // Play win sound
+    playSound('win');
+    
+    // Start animation if not already running
+    if (!this.isAnimating) {
+      this.isAnimating = true;
+      this.animate();
+    }
+  }
+  
+  /**
+   * Animate all effects
+   */
+  animate() {
+    // Clear canvas
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
     // Draw light beam if active
-    if (this.lightBeam && this.lightBeam.opacity > 0) {
-      this.drawLightBeam();
+    if (this.lightBeam) {
+      // Fade out light beam
       this.lightBeam.opacity -= this.lightBeam.fadeSpeed;
+      
+      if (this.lightBeam.opacity > 0) {
+        this.drawLightBeam();
+      } else {
+        this.lightBeam = null;
+      }
     }
     
     // Update and draw fire particles
     let activeFireParticles = false;
+    
     for (let i = 0; i < this.fireParticles.length; i++) {
       const particle = this.fireParticles[i];
       
@@ -292,6 +313,11 @@ class WinEffects {
             // Bounce with energy loss
             coin.speedY = -coin.speedY * 0.6;
             coin.bounceCount++;
+            
+            // Play coin bounce sound (only for some coins to avoid too many sounds)
+            if (Math.random() < 0.1) {
+              playSound('coinBounce');
+            }
           } else {
             // Settle coin
             coin.y = floor - coin.size/2;
@@ -323,7 +349,7 @@ class WinEffects {
     } else {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.isAnimating = false;
-      this.canvas.style.display = 'none';
+      console.log('Animation finished');
     }
   }
   
@@ -438,12 +464,15 @@ class WinEffects {
     
     console.log('Drawing paylines with fire trails');
     
+    // Make sure canvas is visible
+    this.canvas.style.display = 'block';
+    
     // Clear existing fire particles
     this.fireParticles = [];
     
     // Create fire trails for all winning lines
     winningLines.forEach(line => {
-      this.createFireTrail(line.positions);
+      this.createFireTrail(line.positions, line.isScatter);
     });
     
     // Start animation if not already running

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sizzling Hot Slots</title>
+  <title>Sizzling Hot™ deluxe</title>
   <link rel="stylesheet" href="css/style.css">
   <!-- Telegram Mini App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -13,7 +13,7 @@
     <div class="game-container" id="game-container">
       <div id="slot-machine">
         <div class="slot-header">
-          <h1>Sizzling Hot Slots</h1>
+          <h1>Sizzling Hot™ deluxe</h1>
         </div>
         <div id="reels-container">
           <div class="reel" id="reel1">
@@ -41,6 +41,13 @@
             <div class="symbol">🍑</div>
             <div class="symbol">7️⃣</div>
           </div>
+          <div class="paylines">
+            <div class="payline payline-1"></div>
+            <div class="payline payline-2"></div>
+            <div class="payline payline-3"></div>
+            <div class="payline payline-4"></div>
+            <div class="payline payline-5"></div>
+          </div>
         </div>
         <!-- Canvas for win effects positioned absolutely -->
         <canvas id="win-effect-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000;"></canvas>
@@ -53,10 +60,78 @@
           </div>
           <button id="spin-button">SPIN</button>
           <div id="win-display">Win: <span id="win-amount">0</span></div>
-          <div class="auto-spin-container">
-            <label for="auto-spin">Auto Spin</label>
-            <input type="checkbox" id="auto-spin">
+          <div class="bottom-controls controls">
+            <div class="auto-spin-container">
+              <label for="auto-spin">Auto Spin</label>
+              <input type="checkbox" id="auto-spin">
+            </div>
+            <button id="paytable-button">PAYTABLE</button>
           </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Paytable Modal -->
+    <div id="paytable-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Sizzling Hot™ deluxe Paytable</h2>
+        <div class="paytable-grid">
+          <div class="paytable-row">
+            <div class="symbol-cell">7️⃣</div>
+            <div class="payout-cell">5x: 5000</div>
+            <div class="payout-cell">4x: 1000</div>
+            <div class="payout-cell">3x: 100</div>
+          </div>
+          <div class="paytable-row">
+            <div class="symbol-cell">🍉</div>
+            <div class="payout-cell">5x: 500</div>
+            <div class="payout-cell">4x: 200</div>
+            <div class="payout-cell">3x: 50</div>
+          </div>
+          <div class="paytable-row">
+            <div class="symbol-cell">🍇</div>
+            <div class="payout-cell">5x: 500</div>
+            <div class="payout-cell">4x: 200</div>
+            <div class="payout-cell">3x: 50</div>
+          </div>
+          <div class="paytable-row">
+            <div class="symbol-cell">🍑</div>
+            <div class="payout-cell">5x: 200</div>
+            <div class="payout-cell">4x: 50</div>
+            <div class="payout-cell">3x: 20</div>
+          </div>
+          <div class="paytable-row">
+            <div class="symbol-cell">🍊</div>
+            <div class="payout-cell">5x: 200</div>
+            <div class="payout-cell">4x: 50</div>
+            <div class="payout-cell">3x: 20</div>
+          </div>
+          <div class="paytable-row">
+            <div class="symbol-cell">🍋</div>
+            <div class="payout-cell">5x: 200</div>
+            <div class="payout-cell">4x: 50</div>
+            <div class="payout-cell">3x: 20</div>
+          </div>
+          <div class="paytable-row">
+            <div class="symbol-cell">🍒</div>
+            <div class="payout-cell">5x: 200</div>
+            <div class="payout-cell">4x: 50</div>
+            <div class="payout-cell">3x: 20</div>
+            <div class="payout-cell">2x: 5</div>
+          </div>
+          <div class="paytable-row">
+            <div class="symbol-cell">⭐</div>
+            <div class="payout-cell">5x: 50</div>
+            <div class="payout-cell">4x: 10</div>
+            <div class="payout-cell">3x: 2</div>
+            <div class="payout-cell">SCATTER</div>
+          </div>
+        </div>
+        <div class="paylines-info">
+          <h3>5 Win Lines</h3>
+          <p>Winning combinations start from the leftmost reel and run along the win line to the right.</p>
+          <p>Scatter symbols (⭐) pay in any position.</p>
         </div>
       </div>
     </div>
@@ -65,9 +140,35 @@
   <!-- Game scripts -->
   <script src="js/config.js"></script>
   <script src="js/symbols.js"></script>
+  <script src="js/soundManager.js"></script>
   <script src="js/winEffects.js"></script>
   <script src="js/reel.js"></script>
   <script src="js/slotMachine.js"></script>
   <script src="js/app.js"></script>
+  
+  <script>
+    // Paytable modal functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('paytable-modal');
+      const btn = document.getElementById('paytable-button');
+      const closeBtn = document.querySelector('.close-button');
+      
+      btn.onclick = function() {
+        modal.style.display = "block";
+        playSound('button');
+      }
+      
+      closeBtn.onclick = function() {
+        modal.style.display = "none";
+        playSound('button');
+      }
+      
+      window.onclick = function(event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      }
+    });
+  </script>
 </body>
 </html> 

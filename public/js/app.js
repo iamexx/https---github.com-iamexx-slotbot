@@ -21,6 +21,9 @@ function init() {
     initTelegramApp();
   }
   
+  // Add sound control button
+  addSoundControl();
+  
   console.log('Game initialized');
 }
 
@@ -50,9 +53,39 @@ function initTelegramApp() {
     // Add coins to balance
     const currentBalance = parseInt(document.getElementById('balance').textContent);
     slotMachine.updateBalance(currentBalance + 1000);
+    playSound('button');
   });
   
   console.log('Telegram Mini App initialized');
+}
+
+// Add sound control button
+function addSoundControl() {
+  const controlsContainer = document.querySelector('.controls');
+  
+  if (controlsContainer) {
+    // Create sound button
+    const soundButton = document.createElement('button');
+    soundButton.id = 'sound-toggle';
+    soundButton.className = 'control-button sound-on';
+    soundButton.innerHTML = '🔊';
+    soundButton.title = 'Toggle Sound';
+    
+    // Add click handler
+    soundButton.addEventListener('click', () => {
+      const isMuted = soundManager.toggleMute();
+      soundButton.innerHTML = isMuted ? '🔇' : '🔊';
+      soundButton.className = `control-button ${isMuted ? 'sound-off' : 'sound-on'}`;
+      
+      // Play button sound if unmuting
+      if (!isMuted) {
+        playSound('button');
+      }
+    });
+    
+    // Add to controls
+    controlsContainer.appendChild(soundButton);
+  }
 }
 
 // Initialize the game when the DOM is loaded

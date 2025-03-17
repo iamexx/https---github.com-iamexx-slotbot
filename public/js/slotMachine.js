@@ -18,6 +18,9 @@ class SlotMachine {
     this.autoSpinCheckbox = document.getElementById('auto-spin');
     this.isSpinning = false;
     
+    // Set game title
+    document.querySelector('.slot-header h1').textContent = CONFIG.gameName;
+    
     // Initialize reels
     for (let i = 0; i < CONFIG.reels.count; i++) {
       this.reels.push(new Reel(i));
@@ -30,8 +33,14 @@ class SlotMachine {
     this.spinButton.addEventListener('click', () => this.spin());
     
     // Add bet controls
-    document.getElementById('bet-minus').addEventListener('click', () => this.adjustBet(-CONFIG.betStep));
-    document.getElementById('bet-plus').addEventListener('click', () => this.adjustBet(CONFIG.betStep));
+    document.getElementById('bet-minus').addEventListener('click', () => {
+      this.adjustBet(-CONFIG.betStep);
+      playSound('button');
+    });
+    document.getElementById('bet-plus').addEventListener('click', () => {
+      this.adjustBet(CONFIG.betStep);
+      playSound('button');
+    });
     
     console.log('Slot machine initialized');
   }
@@ -79,6 +88,9 @@ class SlotMachine {
     
     console.log('Spinning reels...');
     
+    // Play spin sound
+    playSound('spin');
+    
     // Clear previous win display
     this.updateWinAmount(0);
     
@@ -105,7 +117,11 @@ class SlotMachine {
     this.reels.forEach((reel, index) => {
       const promise = new Promise(resolve => {
         setTimeout(() => {
-          reel.spin().then(resolve);
+          reel.spin().then(() => {
+            // Play reel stop sound
+            playSound('reelStop');
+            resolve();
+          });
         }, index * CONFIG.reels.spinStartDelay);
       });
       spinPromises.push(promise);
@@ -124,6 +140,13 @@ class SlotMachine {
         const newBalance = parseInt(this.balance.textContent) + winResult.totalWinnings;
         this.updateBalance(newBalance);
         this.updateWinAmount(winResult.totalWinnings);
+        
+        // Play win sound - big win for large amounts
+        if (winResult.totalWinnings >= bet * 10) {
+          playSound('bigWin');
+        } else {
+          playSound('win');
+        }
         
         // Show win effects
         this.showWinningEffects(winResult);
@@ -147,6 +170,41 @@ class SlotMachine {
     
     // Get current symbols on each reel
     const reelSymbols = this.reels.map(reel => reel.getVisibleSymbols());
+    
+    // Check for scatter wins (STAR symbol)
+    const scatterPositions = [];
+    let scatterCount = 0;
+    
+    // Count scatter symbols across the entire grid
+    for (let col = 0; col < reelSymbols.length; col++) {
+      for (let row = 0; row < reelSymbols[col].length; row++) {
+        if (reelSymbols[col][row] === SYMBOLS.STAR) {
+          scatterCount++;
+          scatterPositions.push({ row, col });
+        }
+      }
+    }
+    
+    // Calculate scatter win if 3 or more stars
+    if (scatterCount >= 3) {
+      const payoutIndex = scatterCount - 3;
+      const payout = SYMBOLS_CONFIG[SYMBOLS.STAR].payouts[payoutIndex] || 0;
+      const win = payout * bet;
+      
+      if (win > 0) {
+        result.totalWinnings += win;
+        result.winningLines.push({
+          symbol: SYMBOLS.STAR,
+          count: scatterCount,
+          winAmount: payout,
+          positions: scatterPositions,
+          lineIndex: -1, // Special index for scatter
+          isScatter: true
+        });
+        
+        console.log(`Scatter win: ${scatterCount}x ${SYMBOLS.STAR} - ${win} credits`);
+      }
+    }
     
     // Check each payline
     CONFIG.paylines.forEach((payline, lineIndex) => {
@@ -192,7 +250,7 @@ class SlotMachine {
     let count = 0;
     
     for (let i = 0; i < lineSymbols.length; i++) {
-      if (lineSymbols[i] === firstSymbol || lineSymbols[i] === SYMBOLS.WILD) {
+      if (lineSymbols[i] === firstSymbol) {
         count++;
         result.positions.push(positions[i]);
       } else {
@@ -201,17 +259,22 @@ class SlotMachine {
     }
     
     // Check if we have a win
-    if (count >= 3) {
-      const symbolToCheck = firstSymbol === SYMBOLS.WILD ? lineSymbols[1] : firstSymbol;
-      const payouts = SYMBOLS_CONFIG[symbolToCheck]?.payouts || [];
+    if (count >= 3 || (count === 2 && firstSymbol === SYMBOLS.CHERRY && SYMBOLS_CONFIG[SYMBOLS.CHERRY].paysTwoOfAKind)) {
+      const symbolConfig = SYMBOLS_CONFIG[firstSymbol];
+      let payoutIndex;
       
-      // Get payout for this number of symbols
-      const payoutIndex = count - 3;
-      if (payoutIndex >= 0 && payoutIndex < payouts.length) {
-        result.symbol = symbolToCheck;
-        result.count = count;
-        result.winAmount = payouts[payoutIndex];
+      if (count === 2 && firstSymbol === SYMBOLS.CHERRY) {
+        // Special case for 2 cherries
+        payoutIndex = -1; // Special index for 2 of a kind
+        result.winAmount = 5; // Fixed payout for 2 cherries
+      } else {
+        // Normal case for 3, 4, or 5 of a kind
+        payoutIndex = count - 3;
+        result.winAmount = symbolConfig.payouts[payoutIndex] || 0;
       }
+      
+      result.symbol = firstSymbol;
+      result.count = count;
     }
     
     return result;
